@@ -1,10 +1,10 @@
 # Pipeline State
 
-**Current step:** Step 1 (Requirements)
+**Current step:** Step 2 (Architecture)
 
 | Step | Name | Agent | Status |
 |------|------|-------|--------|
-| 1 | Requirements | requirements-analyst | Not started |
+| 1 | Requirements | requirements-analyst | Approved |
 | 2 | Architecture | architect | Not started |
 | 3 | Design review | design-reviewer | Not started |
 | 4 | Implementation plan | implementation-planner | Not started |
