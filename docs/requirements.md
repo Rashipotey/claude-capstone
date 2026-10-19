@@ -2,7 +2,7 @@
 
 - Source: `input/user-story-docsync.md` (DOCSYNC-101, fictional, status "Proposed - pending clarification")
 - Date drafted: 2026-10-19
-- Status: Ready for sign-off. All ten clarification questions (Q1-Q10) are decided. No pending decision items remain other than human sign-off. Not approved.
+- Status: Approved (2026-10-19, human sign-off on the file as it stands). Labels on some Q1–Q10 rows were written by the assistant and not verified against the human's wording; the file is approved as written.
 
 ## 1. Story
 
@@ -114,4 +114,4 @@ Resolved 2026-10-19 (no longer pending): Q7 threshold (single threshold, 50 file
 
 ## 9. Approval
 
-Not approved. All ten clarification questions (Q1-Q10) are decided. No pending decision items other than human sign-off to proceed to Step 2.
+Approved (2026-10-19). All ten clarification questions (Q1–Q10) are decided.
