@@ -2,7 +2,7 @@
 
 - Input: `docs/requirements.md` (Status: Approved 2026-10-19)
 - Date drafted: 2026-10-20
-- Status: Ready for sign-off
+- Status: Approved (2026-10-21, human sign-off)
 
 ## 0. Items the requirements left as Not Found, and how they were resolved
 
