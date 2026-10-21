@@ -170,4 +170,4 @@ Local-only and least privilege:
 
 ## 10. Sign-off
 
-Status: Ready for sign-off. Human approval of this architecture is required before Step 3; it has not been given. Decisions D1-D10 are human decisions recorded in requirements Section 8b (2026-10-21). Details still Not Found are listed under the Section 0 table.
+Status: Approved (2026-10-21, human sign-off). Decisions D1-D10 are human decisions recorded in requirements Section 8b (2026-10-21). Details still Not Found are listed under the Section 0 table.

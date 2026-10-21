@@ -1,12 +1,12 @@
 # Pipeline State
 
-**Current step:** Step 3 (Design review)
+**Current step:** Step 4 (Implementation plan)
 
 | Step | Name | Agent | Status |
 |------|------|-------|--------|
 | 1 | Requirements | requirements-analyst | Approved |
 | 2 | Architecture | architect | Approved |
-| 3 | Design review | design-reviewer | Not started |
+| 3 | Design review | design-reviewer | Approved |
 | 4 | Implementation plan | implementation-planner | Not started |
 | 5 | Implementation | implementer | Not started |
 | 6 | Code review | code-reviewer | Not started |
