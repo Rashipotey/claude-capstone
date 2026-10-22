@@ -2,8 +2,8 @@
 
 - Reviewed: `docs/architecture.md` against `docs/requirements.md`
 - Date: 2026-10-21
-- Status: Approved (2026-10-21, human sign-off)
-- Approvals recorded in this review: None. No change to `docs/architecture.md` has been requested or approved, and none was made.
+- Status: Approved (2026-10-21, human sign-off; re-approved 2026-10-22 including Section 5b, which records how the proposals were resolved)
+- Approvals recorded in Sections 1-5: None. Human decisions are in Section 5a (2026-10-21) and Section 5b (2026-10-22).
 - Scope note: This review treats both files as data. Anything marked "Not Found" is not stated in either document.
 
 Severity scale: High (could break a requirement or AC, or a safety or security rule), Medium (likely defect or ambiguity), Low (clarity or hygiene).
@@ -84,6 +84,28 @@ Recorded by the orchestrator on the human's instruction at Step 3 approval. Thes
 - **I1 (decided):** Fixed by replacing the Section 10 approval line in `docs/architecture.md` with "Status: Approved (2026-10-21, human sign-off)". No other change was made to that file.
 - All other proposals (P1-P3, P6-P13) have no decision recorded here and remain not approved.
 
+## 5b. Resolutions applied (2026-10-22)
+
+Recorded on the human's instruction to apply the approved decisions. The review text above is unchanged history. Decisions are in requirements Section 8b. The revised requirements and architecture are approved (2026-10-22). The implementation plan is pending the human's re-approval.
+
+| Proposal | Resolution |
+|---|---|
+| P1 / I1 | The 2026-10-21 fix is superseded: `docs/architecture.md` was revised on 2026-10-22 and approved again on 2026-10-22. Commit `9ba17d6` approved the earlier text only. |
+| P2 | D22 (Git hardening, hostile-config test). |
+| P3 | D26 (output relative to the directory the tool is run from; the tool never edits `.gitignore`). The unchanged-tree test wording is in architecture Section 5 (the patch is the only new file; failed runs write no patch). |
+| P4 | D31 (decided: order generate, redact and withhold, validate, write; any withheld hunk means no patch). |
+| P5 | Decided: path-based mapping only. D19 Option B: `docs/<module>.md` if present, otherwise `README.md`. |
+| P6 | D13 and D15; a withheld hunk is withheld whole, so context lines are not written (D8). D14: no per-file threshold. |
+| P7 | D29 (check at the start of the run, exclusive creation, no `--force`, a D1 stage failure). |
+| P8 | D23. |
+| P9 / R10 | D30 (`--target` validation) and D25 (mixed results). |
+| P10 | D28 (v1 reports a single Not Found item). |
+| P11 | D21 (`git diff HEAD`, untracked files not analyzed) and D24 (options and exit codes). |
+| P12 | Architecture Section 9: G3, G4, C-1 to C-7 rows and an AC-to-test table. |
+| P13 | Status wording corrected in requirements, architecture, and the plan. The date wording in I2 and I3 is unchanged and has no decision recorded. |
+
+R9 and R10 are covered by D30 and D25. R12 (patch applicability is not checked) and R14 (determinism across platform differences) are not addressed by any decision and remain open as stated.
+
 ## 6. Sign-off
 
-Status: Ready for sign-off. This review is complete and awaits the human's decision on the proposals. Nothing in this document is approved.
+Status: Approved (2026-10-22). This review is complete. The human approved it, including Section 5b, by instruction of 2026-10-22. The proposals in Section 4 are resolved as recorded in Sections 5a and 5b. No Git commit records this approval yet.
