@@ -53,6 +53,10 @@ __all__ = [
     "analyze",
 ]
 
+# Largest file the working-tree reader returns (code review M-1): 4 bytes per character for
+# proposal.MAX_ORIGINAL_CHARS = 1_000_000 characters. A larger file reads as None.
+MAX_READ_BYTES = 4_000_000
+
 _HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 LANG_PYTHON = "python"
@@ -321,7 +325,8 @@ def working_tree_reader(repo_root):
     """Return a read-only ``read_text(path)`` for files under ``repo_root``.
 
     It returns the UTF-8 text of a regular file inside the root, or None when the path
-    escapes the root, is missing or unreadable, or is not valid UTF-8. It never writes.
+    escapes the root, is missing or unreadable, is larger than ``MAX_READ_BYTES``, or is not
+    valid UTF-8. It never writes.
     """
     from pathlib import Path
 
@@ -331,9 +336,13 @@ def working_tree_reader(repo_root):
         try:
             target = (root / path).resolve()
             target.relative_to(root)
-            if not target.is_file():
+            if not target.is_file() or target.stat().st_size > MAX_READ_BYTES:
                 return None
-            return target.read_bytes().decode("utf-8")
+            with open(target, "rb") as handle:
+                data = handle.read(MAX_READ_BYTES + 1)  # bounded even if the file grew since stat
+            if len(data) > MAX_READ_BYTES:
+                return None
+            return data.decode("utf-8")
         except (OSError, ValueError, UnicodeDecodeError):
             return None
 

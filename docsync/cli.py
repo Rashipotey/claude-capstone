@@ -499,6 +499,11 @@ def _rollback(token):
         return False
 
 
+_NOT_ACHIEVED_LINE = (
+    "Run stopped: UNEXPECTED. All-or-nothing outcome NOT achieved: a patch may remain at %s/%s."
+    % (output.OUTPUT_DIR, output.PATCH_NAME))  # constant text, no data from the run
+
+
 def _groups(outcome):
     groups = {}
     for result in outcome.results:
@@ -616,9 +621,12 @@ def _finish(run, ready):
             run.enter("render")
             text = ready.render(token.path)
     except BaseException as exc:
-        _rollback(token)
+        rolled_back = _rollback(token)
         if not isinstance(exc, Exception):
             raise
+        if not rolled_back:  # the ordinary stop report would claim that no patch was written
+            _emit(_NOT_ACHIEVED_LINE, ExitCode.UNEXPECTED)
+            return int(ExitCode.UNEXPECTED)
         return _stop(run, _Unexpected())
 
     run.enter("emit")

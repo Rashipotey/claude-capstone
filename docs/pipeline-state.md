@@ -1,6 +1,6 @@
 # Pipeline State
 
-**Current step:** Step 5 (Implementation), one task at a time as the human directs. **T13 (Patch Writer) and T14 (Reporter) are Approved by the human (2026-10-25), with the open items listed below carried forward. T10b (Proposal Builder) and T15 (Orchestrator) are Approved by the human (2026-10-25) with documented limitations (see their rows and logs). T16 (End-to-end and traceability) is Approved by the human (2026-10-25). All Step 5 tasks are done; Step 6 (code review) is NOT started and needs the human's explicit instruction.** Nothing is staged or committed by the orchestrator or implementer (HEAD `bbe7f4f`; implementer-reported, not independently checked). Updated 2026-10-25.
+**Current step:** Steps 1-6 are Approved (Step 5 Implementation closed and Step 6 Code Review approved by the human, 2026-10-26, with documented limitations). **Step 7 (Verification) is NOT started and needs the human's explicit instruction.** Open and not closed by any approval: the T13 audit discrepancy (RC-2), unverified requirements/design traceability, M-1/M-2 fixes not re-audited, the full suite not re-run after those fixes, and the other limitations listed below and in `docs/code-review.md`. Nothing is staged or committed by the orchestrator or implementer (HEAD `bbe7f4f`; implementer-reported, not independently checked). Updated 2026-10-26.
 
 This file holds current status only. Detail and history live in `impl-log/` (append-only; per-task logs below). If they disagree, this file wins. The previous long version of this file is preserved verbatim in `impl-log/archive/pipeline-state.full-2026-10-25.md` (do not edit).
 
@@ -12,8 +12,8 @@ This file holds current status only. Detail and history live in `impl-log/` (app
 | 2 | Architecture | architect | Approved (2026-10-22) |
 | 3 | Design review | design-reviewer | Approved (2026-10-21; re-approved 2026-10-22) |
 | 4 | Implementation plan | implementation-planner | Approved (2026-10-22) |
-| 5 | Implementation | implementer | All tasks T01-T16 (including T10b) done and individually approved (2026-10-25). Step 5 as a whole is awaiting the human's decision to close it; code review (Step 6) NOT started |
-| 6 | Code review | code-reviewer | Not started |
+| 5 | Implementation | implementer | **Approved / closed by the human (2026-10-26)**: all tasks T01-T16 (including T10b) done and individually approved |
+| 6 | Code review | code-reviewer | **Approved by the human (2026-10-26), with documented limitations.** Preserved and NOT closed by the approval: RC-2 (the T13 audit discrepancy, unresolved); requirements/design traceability UNVERIFIED; the M-1 and M-2 fixes NOT re-audited; the full suite NOT re-run after those fixes; 7 Low, 3 Info and all other limitations. Step 7 not started. Review record: (`docs/code-review.md` transcribed by the orchestrator from the reviewer's text at the human's instruction, 2026-10-26; Pass with conditions: 0 Critical, 0 High, 2 Medium (M-1 unbounded memory: fixed 2026-10-26 on the human's instruction, corrected once, correction not re-audited, focused tests OK (implementer-reported); M-2 false "no patch was written" after a failed rollback: fixed 2026-10-26 with Option A (cli.py only), not audited, focused tests OK (implementer-reported: 99 OK, 3 skipped; e2e 32 OK); the full suite not re-run since the fixes), 7 Low, 3 Info; full requirements/design traceability UNVERIFIED) |
 | 7 | Verification | verifier | Not started |
 | 8 | Pull request | pr-author | Not started |
 

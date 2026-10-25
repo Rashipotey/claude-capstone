@@ -753,6 +753,57 @@ class DestinationRenderTests(Base):
         self.assertEqual(code, 12)
         self.assertEqual(sha(self.patch_path), state["sha"])
 
+    def _second_render_fails(self, r, remove_fails):
+        patches, info, renders = self.run_with_token_path(r, lambda p: p + ".resolved")
+        real_render = report.render_report
+
+        def render(result, *, redactor):
+            if result.patch_path is not None and result.patch_path.endswith(".resolved"):
+                raise RuntimeError(EXC_SECRET)
+            return real_render(result, redactor=redactor)
+
+        patches[2] = mock.patch.object(report, "render_report", render)
+        emits = []
+        real_emit = report.emit_report
+        patches.append(mock.patch.object(report, "emit_report", lambda t: (emits.append(t), real_emit(t))[1]))
+        if remove_fails:
+            patches.append(mock.patch("docsync.output.os.remove",
+                                      side_effect=PermissionError(errno.EACCES, "held open")))
+        with contextlib.ExitStack() as stack:
+            for p in patches:
+                stack.enter_context(p)
+            code, out, err = self.run_main([str(r.path)])
+        return code, out, err, emits
+
+    def test_second_render_failure_with_failed_rollback_prints_only_the_fixed_line(self):
+        r = self.repo()
+        code, out, err, emits = self._second_render_fails(r, remove_fails=True)
+        self.assertEqual(code, 12)
+        self.assertEqual(emits, [cli._NOT_ACHIEVED_LINE])
+        self.assertIn(cli._NOT_ACHIEVED_LINE, out)
+        self.assertNotIn("no patch was written", out)
+        self.assertTrue(self.patch_path.exists())
+        self.assertIn("all-or-nothing outcome NOT achieved", err)
+        self.assertNotIn(EXC_SECRET, out + err)
+
+    def test_second_render_failure_with_successful_rollback_prints_the_ordinary_report(self):
+        r = self.repo()
+        code, out, err, emits = self._second_render_fails(r, remove_fails=False)
+        self.assertEqual(code, 12)
+        self.assertEqual(len(emits), 1)
+        self.assertIn("no patch was written", out)
+        self.assertNotIn("NOT achieved", out)
+        self.assert_no_patch()
+
+    def test_not_achieved_line_is_constant(self):
+        self.assertEqual(
+            cli._NOT_ACHIEVED_LINE,
+            "Run stopped: UNEXPECTED. All-or-nothing outcome NOT achieved: "
+            "a patch may remain at output/docsync.patch.")
+        self.assertNotIn(os.sep + "output", cli._NOT_ACHIEVED_LINE.replace("output/", ""))
+        self.assertNotIn(tempfile.gettempdir(), cli._NOT_ACHIEVED_LINE)
+        self.assertNotIn(EXC_SECRET, cli._NOT_ACHIEVED_LINE)
+
 
 class IsolationTests(unittest.TestCase):
     def test_this_suite_does_not_use_the_repository_output_directory(self):

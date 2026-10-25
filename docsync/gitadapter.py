@@ -11,7 +11,8 @@ Controls held here as data (plan T05, "Hardening controls"):
   the path is never placed in an argument vector (paths are data, E11).
 * An environment built from scratch (never copied): pass-through of ``PATH`` and, on
   Windows, ``SYSTEMROOT``, ``TEMP``, ``TMP``; a fixed set of ``GIT_*`` values; all else dropped.
-* ``subprocess.run([...], shell=False)`` with a fixed timeout. A timeout is a failed command.
+* A bounded ``subprocess.Popen([...], shell=False)`` runner with a fixed timeout and capped
+  capture of stdout and stderr. A timeout is a failed command.
 
 Module boundary (architecture Section 1): this module imports no other stage. The
 redaction function is injected by the caller (the CLI passes ``docsync.redact.redact``)
@@ -26,9 +27,11 @@ is set), and any unrecognized failure is reported as a generic failed step.
 import os
 import re
 import subprocess
+import threading
+import time
 from dataclasses import dataclass
 
-from docsync.contracts import ChangedFile, InputOrGitError
+from docsync.contracts import ChangedFile, InputOrGitError, OverCapError
 
 __all__ = [
     "TIMEOUT_SECONDS",
@@ -56,6 +59,17 @@ _STAGE = "gitadapter"
 
 # Fixed timeout per git call, in seconds. A call that exceeds it is a failed command.
 TIMEOUT_SECONDS = 30
+
+# Memory bounds for one git call (code review M-1). Stdout: 64 MiB, far above the diff size
+# cap that can ever pass the size gate (50 files, 2000 changed lines); reaching it ends the
+# call with an over-cap outcome (exit 5). The peak is not 64 MiB: the chunk list, the joined
+# bytes and the later decoded text can coexist, so expect roughly several times the bound
+# (about 3x or more). Stderr is only read to classify a failure, so 64 KiB are kept and the
+# rest is read and discarded.
+MAX_STDOUT_BYTES = 64 * 1024 * 1024
+MAX_STDERR_BYTES = 64 * 1024
+_CHUNK = 64 * 1024
+_GRACE_SECONDS = 5
 
 # G = git --no-pager -c core.fsmonitor=false (the executable name is added by the runner).
 _G = ("--no-pager", "-c", "core.fsmonitor=false")
@@ -124,6 +138,13 @@ class GitCommandError(GitAdapterError):
 
 class GitRejectedError(GitAdapterError):
     """An argument vector did not match an allowed template; nothing was run."""
+
+
+class GitOutputOverCapError(OverCapError):
+    """Git output reached the memory bound (M-1). Exit code 5. The message is fixed text."""
+
+    def __init__(self):
+        super().__init__(_STAGE, "git output is over the size limit; the diff is over the cap, split the change")
 
 
 class ContentFilterError(GitAdapterError):
@@ -358,6 +379,107 @@ def _same_path(a, b):
     return os.path.normcase(os.path.realpath(a)) == os.path.normcase(os.path.realpath(b))
 
 
+def _drain(pipe, limit, sink, exceeded):
+    """Read ``pipe`` to EOF in chunks into ``sink``. Keeps at most ``limit`` bytes.
+
+    If ``exceeded`` is given, reading stops at the first byte over ``limit`` and the event is
+    set (stdout). Otherwise the rest is read and discarded so the child never blocks (stderr).
+    """
+    kept = 0
+    try:
+        while True:
+            chunk = pipe.read(_CHUNK)
+            if not chunk:
+                return
+            room = limit - kept
+            if len(chunk) > room:
+                if exceeded is not None:
+                    exceeded.set()
+                    return
+                chunk = chunk[:room]
+            if chunk:
+                sink.append(chunk)
+                kept += len(chunk)
+    except (OSError, ValueError):
+        return
+
+
+def _bounded_run(argv, *, shell=False, cwd=None, env=None, capture_output=True, stdin=None,
+                 timeout=None):
+    """``subprocess.run`` look-alike with bounded capture (default runner).
+
+    Stdout over ``MAX_STDOUT_BYTES`` ends the call: only this child is killed by its own
+    handle and ``GitOutputOverCapError`` is raised. Stderr keeps ``MAX_STDERR_BYTES``.
+    """
+    # bufsize=0: raw pipes, so a drain thread blocked in read() shares no buffer lock with a
+    # close() call. A pipe is closed only after its drain thread has exited.
+    proc = subprocess.Popen(argv, shell=shell, cwd=cwd, env=env, stdin=stdin,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)
+    out, err = [], []
+    exceeded = threading.Event()
+    pairs = [
+        (proc.stdout, threading.Thread(target=_drain, args=(proc.stdout, MAX_STDOUT_BYTES, out, exceeded),
+                                       daemon=True)),
+        (proc.stderr, threading.Thread(target=_drain, args=(proc.stderr, MAX_STDERR_BYTES, err, None),
+                                       daemon=True)),
+    ]
+    threads = [t for _pipe, t in pairs]
+    for t in threads:
+        t.start()
+
+    def close_finished():
+        # A pipe whose drain thread is still alive (a descendant may hold the write end) is
+        # left to that daemon thread; closing it could block.
+        for pipe, t in pairs:
+            if not t.is_alive():
+                try:
+                    pipe.close()
+                except (OSError, ValueError):
+                    pass
+
+    def stop():
+        # Kills only this child, by its handle. Descendants it spawned are NOT killed.
+        end = time.monotonic() + _GRACE_SECONDS  # one shared grace period for all waits
+        try:
+            proc.kill()
+        except OSError:
+            pass
+        try:
+            proc.wait(timeout=_GRACE_SECONDS)
+        except subprocess.TimeoutExpired:
+            pass
+        for t in threads:
+            t.join(timeout=max(end - time.monotonic(), 0))
+        close_finished()
+
+    deadline = None if timeout is None else time.monotonic() + timeout
+    try:
+        while proc.poll() is None and not exceeded.is_set():
+            if deadline is not None and time.monotonic() >= deadline:
+                stop()
+                raise subprocess.TimeoutExpired(argv, timeout)
+            exceeded.wait(0.02)
+        if exceeded.is_set():
+            stop()
+            raise GitOutputOverCapError()
+        for t in threads:  # the child has exited: its pipes reach EOF
+            left = _GRACE_SECONDS if deadline is None else max(deadline - time.monotonic(), 0.1)
+            t.join(timeout=left)
+        if exceeded.is_set():
+            stop()
+            raise GitOutputOverCapError()
+        if any(t.is_alive() for t in threads):
+            # Output may be incomplete (a descendant holds a pipe): fail closed.
+            stop()
+            raise subprocess.TimeoutExpired(argv, timeout)
+    except BaseException:
+        if proc.poll() is None:
+            stop()
+        raise
+    close_finished()
+    return subprocess.CompletedProcess(argv, proc.returncode, b"".join(out), b"".join(err))
+
+
 class GitAdapter:
     """Runs allow-listed git commands in one directory.
 
@@ -366,7 +488,7 @@ class GitAdapter:
     of ``subprocess.run``.
     """
 
-    def __init__(self, repo_path, *, redactor, executable="git", runner=subprocess.run,
+    def __init__(self, repo_path, *, redactor, executable="git", runner=_bounded_run,
                  timeout=TIMEOUT_SECONDS, environment=None):
         if not callable(redactor):
             raise TypeError("redactor must be callable")
@@ -413,6 +535,8 @@ class GitAdapter:
         except OSError:
             raise self._error(GitMissingError, "git executable could not be started") from None
 
+        if isinstance(proc.stdout, (bytes, bytearray)) and len(proc.stdout) > MAX_STDOUT_BYTES:
+            raise GitOutputOverCapError()  # backstop for an injected runner
         if proc.returncode != 0:
             raise self._failure(step, name, proc)
         return proc.stdout
