@@ -93,7 +93,7 @@ def find_violations(module_name, source):
 class PackageLayoutTests(unittest.TestCase):
     def test_one_module_per_stage_plus_contracts(self):
         found = {p.stem for p in PACKAGE_DIR.glob("*.py")}
-        self.assertEqual(found, set(STAGES) | {"__init__", "contracts"})
+        self.assertEqual(found, set(STAGES) | {"__init__", "contracts", "proposal"})  # T10b adds proposal.py (not a stage)
 
     def test_there_are_eleven_stage_modules(self):
         self.assertEqual(
@@ -108,7 +108,10 @@ class PackageLayoutTests(unittest.TestCase):
             self.assertTrue((module.__doc__ or "").strip(), name)
 
     def test_stage_stubs_export_nothing_yet(self):
+        implemented = {"redact", "input", "gitadapter", "sizegate", "analysis", "mapping", "cli", "generation", "validation", "output", "report", "proposal"}  # T02, T03, T04, T06, T07, T08, T09, T10, T11, T13, T14 implemented; each later task removes its stub here
         for name in STAGES:
+            if name in implemented:
+                continue
             module = importlib.import_module("docsync.%s" % name)
             self.assertEqual(module.__all__, [], name)
 

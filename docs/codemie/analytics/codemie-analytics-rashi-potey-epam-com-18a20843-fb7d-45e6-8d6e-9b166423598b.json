@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-23T18:38:55.727Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 408540,
+      "turns": 6,
+      "files": 7,
+      "netLines": 59,
+      "toolCallsTotal": 12,
+      "toolSuccessRate": 91.7,
+      "totalCostUSD": 0.3804278,
+      "cacheReadCostUSD": 0.07722380000000001,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "rashi_potey@epam.com",
+    "periodStart": "2026-10-23T18:32:02.889Z",
+    "periodEnd": "2026-10-23T18:38:51.429Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "18a20843-fb7d-45e6-8d6e-9b166423598b",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "Create a project-level `docsync-workflow` skill for DOCSYNC. - Verify the installed CLI's supported skill format and location before creating it. - Read `docs/orchestrator.md`, `docs/impl-plan.md`, `docs/pipeline-state.md`, and approved planning documents. - Encode the rules: one authorized task at a time, human sign-off between tasks, no silent changes to approved plans, no commits until all work is complete and authorized, accurate test/audit reporting, and required `pipeline-state.md` and `impl-log/` updates. - Preserve limitations and implementation history; stop and ask me if a genuine requirements or architecture conflict arises. - Validate the skill and explain how to invoke it. Do not modify application code or approved planning documents. Do not start T11, stage, or commit anything. Report changes and wait for my review.",
+      "project": "C:\\Users\\RashiPotey\\Documents\\claude-capstone",
+      "branch": "feature/docsync-pipeline",
+      "startTime": 1792780322889,
+      "durationMs": 408540,
+      "turns": 6,
+      "fileOps": 7,
+      "linesAdded": 59,
+      "linesRemoved": 0,
+      "linesModified": 0,
+      "netLines": 59,
+      "filesChanged": 1,
+      "filesWritten": 1,
+      "filesEdited": 0,
+      "toolCallsTotal": 12,
+      "toolCallsSuccess": 11,
+      "toolCallsFailure": 1,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "languages": [
+        "markdown",
+        "json"
+      ],
+      "tools": [
+        {
+          "toolName": "Read",
+          "totalCalls": 7,
+          "successCount": 6,
+          "failureCount": 1,
+          "successRate": 85.71428571428571
+        },
+        {
+          "toolName": "Bash",
+          "totalCalls": 4,
+          "successCount": 4,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Write",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0,
+          "successRate": 100
+        }
+      ],
+      "tokens": {
+        "input": 12,
+        "output": 6546,
+        "cacheRead": 386119,
+        "cacheCreation": 59430,
+        "cacheCreation1h": 59430,
+        "total": 452107
+      },
+      "costUSD": 0.3804278,
+      "cacheReadCostUSD": 0.07722380000000001,
+      "perModelCost": [
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 4,
+            "output": 1321,
+            "cacheRead": 62607,
+            "cacheCreation": 46117,
+            "cacheCreation1h": 46117,
+            "total": 110049
+          },
+          "costUSD": 0.2102074,
+          "unpriced": false
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 8,
+            "output": 5225,
+            "cacheRead": 323512,
+            "cacheCreation": 13313,
+            "cacheCreation1h": 13313,
+            "total": 342058
+          },
+          "costUSD": 0.1702204,
+          "unpriced": false
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "C:\\Users\\RashiPotey\\.claude\\projects\\C--Users-RashiPotey-Documents-claude-capstone\\08469564-5eec-4391-b3be-6ca16154dbd5.jsonl",
+      "costSeries": [
+        {
+          "t": 1792780335279,
+          "cost": 0.0417762,
+          "tokens": 35735
+        },
+        {
+          "t": 1792780345670,
+          "cost": 0.2102074,
+          "tokens": 110049
+        },
+        {
+          "t": 1792780353990,
+          "cost": 0.26192899999999997,
+          "tokens": 191969
+        },
+        {
+          "t": 1792780380609,
+          "cost": 0.31440619999999997,
+          "tokens": 277802
+        },
+        {
+          "t": 1792780386894,
+          "cost": 0.34726999999999997,
+          "tokens": 364092
+        },
+        {
+          "t": 1792780399794,
+          "cost": 0.3804278,
+          "tokens": 452107
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": true,
+      "rootOwnCostUSD": 0.3804278,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "observedEnd": 1792780731429,
+      "rootOwnTokens": {
+        "input": 12,
+        "output": 6546,
+        "cacheRead": 386119,
+        "cacheCreation": 59430,
+        "cacheCreation1h": 59430,
+        "total": 452107
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1792780335279,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0417762,
+          "tokens": 35735
+        },
+        {
+          "t": 1792780345670,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1684312,
+          "tokens": 74314
+        },
+        {
+          "t": 1792780353990,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0517216,
+          "tokens": 81920
+        },
+        {
+          "t": 1792780380609,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0524772,
+          "tokens": 85833
+        },
+        {
+          "t": 1792780386894,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0328638,
+          "tokens": 86290
+        },
+        {
+          "t": 1792780399794,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0331578,
+          "tokens": 88015
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}

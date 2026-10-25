@@ -108,6 +108,7 @@ Files examined; files proposed; files skipped with the reason (generated, docume
 - The file is created with exclusive creation, so an existing file is never overwritten, even if it appears after the pre-check. There is no `--force`.
 - The `output/` directory is created only if it is missing (OQ-6 default).
 - The writer refuses any path inside `README.md` or `docs/` and never edits `.gitignore`.
+- The writer also refuses an `output` that is a symbolic link, a Windows junction, or another reparse point (exit 11, naming the path), before it resolves real paths for `output`. The real-path resolution described above is kept for the other path components. The Reporter states the resolved destination of the patch when it differs from `<cwd>/output/docsync.patch`. (Amendment, human decision 2026-10-25, "policy B"; the earlier text allowed a link to any directory other than `README.md` and `docs/`.)
 
 ## 3. Technology choices
 
@@ -263,7 +264,7 @@ Required effects, from D22:
 - User and system Git configuration is ignored.
 - Execution-capable repository settings are overridden on the command line.
 - The Git environment is cleaned of inherited variables.
-- No repository-defined content filter can run during collection. The run stops before any diff call if one is defined (preflight below).
+- No content filter defined in the superproject configuration can run during collection. The run stops before any diff call if one is defined (preflight below). For submodules the protection is qualified: the preflight cannot see a submodule's own configuration, so the diff commands add `--ignore-submodules=dirty`, which was quiet in every tested state but is verified only on Windows with Git 2.56.0 and the tested fixtures (limitations in Section 9a).
 
 The exact flag list is not decided here. Task T05 fixes it. The Status column is the intended treatment, not a verified result. The last column states the evidence each claim needs before it may be made:
 
@@ -272,6 +273,7 @@ The exact flag list is not decided here. Task T05 fixes it. The Status column is
 | Subcommand allow-list, no shell | Specified | Fixed allow-list in the Git Adapter | T04: forbidden subcommands rejected; a path starting with `-` is data |
 | External diff driver off | Overridden | `--no-ext-diff` | Hostile fixture with a driver command that would write a marker file; marker absent |
 | textconv off | Overridden | `--no-textconv` | Hostile fixture with a textconv command; marker absent |
+| Nested submodule diffs and submodule working-tree state | Overridden (qualified) | `--submodule=short` and `--ignore-submodules=dirty` in the shared diff argument group (amendment approved by the human on 2026-10-22; finding H1: a clean filter in a submodule's own configuration ran during `git diff HEAD` with `--submodule=short` alone, and the preflight reads only the superproject configuration) | Hostile fixture: a submodule whose own configuration defines a clean filter writing a marker; the live control must fire, the protected run leaves the marker absent. Evidence is Windows, Git 2.56.0 (2.56.0.windows.2), one fixture family; no universal protection is claimed. `=untracked` did not help; `=all` was rejected because it removes the submodule entry and pointer change that D23/T06 need. |
 | Pager off | Overridden | `--no-pager` | Hostile fixture with a pager command; marker absent |
 | `core.fsmonitor` | Overridden | `-c core.fsmonitor=false` | Hostile fixture with an fsmonitor command; marker absent |
 | User and system configuration | Ignored | Environment settings such as `GIT_CONFIG_NOSYSTEM` and `GIT_CONFIG_GLOBAL` | Hostile user-level configuration; marker absent |
@@ -423,7 +425,11 @@ Limitations that no decision removes:
 - R12 and R14, as stated in Sections 8.1 and 8.2.
 - Secrets outside the implemented pattern set are not detected (Section 7.2).
 - Execution-capable repository settings other than those in the Section 7.3 table are not neutralized, and no protection is claimed for them.
-- The exact Git flag list is fixed in T05.
+- The exact Git flag list is fixed in T05. By a human-approved amendment of 2026-10-22 the shared diff argument group includes `--ignore-submodules=dirty` (diff templates only; the allow-list stays six templates and the only `-c` option stays `core.fsmonitor=false`).
+- Git limitations added by that amendment (Section 8 holds only determinism and patch-applicability limits, so they are listed here):
+  - (a) A submodule with uncommitted or untracked content but an unchanged HEAD commit is not reported (invisible). A moved submodule pointer (mode 160000) is still reported.
+  - (b) The submodule-protection evidence is limited to Windows, Git 2.56.0 (2.56.0.windows.2) and the tested fixtures. No protection is claimed for other Git versions or platforms.
+  - (c) Known preflight over-refusal, kept as is (conservative, fails safe; human decision 2026-10-22): a `filter.*` key whose value contains `.clean`, `.smudge` or `.process` followed by `=` or end of line (for example `filter.x.required=run.clean`) is refused although it defines no content filter; and a configuration value such as `core.note=x.filter.y.clean=z` is accepted.
 
 ## 9b. Task traceability and the implementation plan
 
