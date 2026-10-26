@@ -13,7 +13,7 @@
 | 5 | Implementation (T01-T16, incl. T07b, T10b, T11b) | Approved / closed (2026-10-26); each task individually approved |
 | 6 | Code review | Approved with documented limitations (2026-10-26) |
 | 7 | Verification | Approved as "Pass with conditions" (2026-10-26) |
-| 8 | Pull request | Human approved the description, the title and opening a DRAFT PR (2026-10-26), accepting that no `docs/security-audit.md` exists and F2/F3 are open (`docs/pr-description.md`). The PR is opened as a draft; merge is not approved. |
+| 8 | Pull request | Human approved the description, the title and opening a DRAFT PR (2026-10-26), accepting that no `docs/security-audit.md` exists and F2/F3 are open (`docs/pr-description.md`). Committed as `616ae84`. The first push attempt failed (`Could not resolve host: github.com`); the human then reported the push succeeded, and the local remote-tracking ref `origin/feature/docsync-pipeline` now equals `616ae84` (orchestrator read the ref files; the remote itself was not queried). No PR is recorded yet (Not Found). Merge is not approved. |
 
 Task logs: `impl-log/T01-...` to `T16-...` (see `impl-log/README.md`). Approved planning documents were amended only on explicit human authorization (details in the T05 and T13 logs).
 
