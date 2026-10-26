@@ -1,0 +1,263 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-23T17:55:05.380Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 160750,
+      "turns": 8,
+      "files": 23,
+      "netLines": 668,
+      "toolCallsTotal": 29,
+      "toolSuccessRate": 100,
+      "totalCostUSD": 0.5993998,
+      "cacheReadCostUSD": 0.0676798,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "<redacted>",
+    "periodStart": "2026-10-23T17:41:59.178Z",
+    "periodEnd": "2026-10-23T17:44:39.928Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "dc0b077a-88cc-4ca3-b4cd-7f1d2f45d318",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "Create an `impl-log/` directory for DOCSYNC implementation history. 1. Create `README.md` and one Markdown log per implementation phase, following the approved plan's phase boundaries. 2. Backfill T01–T09 using available evidence. Record changes, test results, every skipped test, security findings, limitations, verification status, and human approvals. Clearly label unverified information. 3. For T10 onward, the orchestrator must update the relevant phase log at task start, after implementation/audit, and after my sign-off. Preserve previous attempts and corrections. 4. Keep `docs/pipeline-state.md` as the source of truth for current status; update it only to record the logging setup and log location. 5. Do not modify approved planning documents, implement T10, add runtime logging, stage files, or commit anything. Verify the files and historical records, report created/modified files and any missing evidence, then stop and wait for my sign-off.",
+      "project": "<redacted>",
+      "branch": "feature/docsync-pipeline",
+      "startTime": 1792777319178,
+      "durationMs": 160750,
+      "turns": 8,
+      "fileOps": 23,
+      "linesAdded": 668,
+      "linesRemoved": 0,
+      "linesModified": 0,
+      "netLines": 668,
+      "filesChanged": 20,
+      "filesWritten": 19,
+      "filesEdited": 1,
+      "toolCallsTotal": 29,
+      "toolCallsSuccess": 29,
+      "toolCallsFailure": 0,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "languages": [
+        "markdown",
+        "python"
+      ],
+      "tools": [
+        {
+          "toolName": "Write",
+          "totalCalls": 19,
+          "successCount": 19,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Glob",
+          "totalCalls": 4,
+          "successCount": 4,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Grep",
+          "totalCalls": 3,
+          "successCount": 3,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Read",
+          "totalCalls": 2,
+          "successCount": 2,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Edit",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0,
+          "successRate": 100
+        }
+      ],
+      "tokens": {
+        "input": 16,
+        "output": 24726,
+        "cacheRead": 338399,
+        "cacheCreation": 71107,
+        "cacheCreation1h": 71107,
+        "total": 434248
+      },
+      "costUSD": 0.5993998,
+      "cacheReadCostUSD": 0.0676798,
+      "perModelCost": [
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 4,
+            "output": 1205,
+            "cacheRead": 8644,
+            "cacheCreation": 44601,
+            "cacheCreation1h": 44601,
+            "total": 54454
+          },
+          "costUSD": 0.1921908,
+          "unpriced": false
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 12,
+            "output": 23521,
+            "cacheRead": 329755,
+            "cacheCreation": 26506,
+            "cacheCreation1h": 26506,
+            "total": 379794
+          },
+          "costUSD": 0.407209,
+          "unpriced": false
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "<redacted>",
+      "costSeries": [
+        {
+          "t": 1792777328235,
+          "cost": 0.03762,
+          "tokens": 8950
+        },
+        {
+          "t": 1792777336625,
+          "cost": 0.1921908,
+          "tokens": 54454
+        },
+        {
+          "t": 1792777348893,
+          "cost": 0.222557,
+          "tokens": 102253
+        },
+        {
+          "t": 1792777387818,
+          "cost": 0.2997118,
+          "tokens": 156438
+        },
+        {
+          "t": 1792777443620,
+          "cost": 0.4437076,
+          "tokens": 221897
+        },
+        {
+          "t": 1792777462967,
+          "cost": 0.5330075999999999,
+          "tokens": 291199
+        },
+        {
+          "t": 1792777468428,
+          "cost": 0.568452,
+          "tokens": 361865
+        },
+        {
+          "t": 1792777480237,
+          "cost": 0.5993997999999999,
+          "tokens": 434248
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": true,
+      "rootOwnCostUSD": 0.5993998,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "rootOwnTokens": {
+        "input": 16,
+        "output": 24726,
+        "cacheRead": 338399,
+        "cacheCreation": 71107,
+        "cacheCreation1h": 71107,
+        "total": 434248
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1792777328235,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.03762,
+          "tokens": 8950
+        },
+        {
+          "t": 1792777336625,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1545708,
+          "tokens": 45504
+        },
+        {
+          "t": 1792777348893,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0303662,
+          "tokens": 47799
+        },
+        {
+          "t": 1792777387818,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0771548,
+          "tokens": 54185
+        },
+        {
+          "t": 1792777443620,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1439958,
+          "tokens": 65459
+        },
+        {
+          "t": 1792777462967,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0893,
+          "tokens": 69302
+        },
+        {
+          "t": 1792777468428,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0354444,
+          "tokens": 70666
+        },
+        {
+          "t": 1792777480237,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0309478,
+          "tokens": 72383
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}

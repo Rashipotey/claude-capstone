@@ -1,0 +1,1036 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-22T12:49:52.694Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 28830493,
+      "turns": 105,
+      "files": 48,
+      "netLines": 4341,
+      "toolCallsTotal": 138,
+      "toolSuccessRate": 97.1,
+      "totalCostUSD": 12.8219268,
+      "cacheReadCostUSD": 5.9112448,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "<redacted>",
+    "periodStart": "2026-10-22T04:49:18.316Z",
+    "periodEnd": "2026-10-22T12:49:48.809Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "207c3ca0-67bb-4191-8923-c3406bba19a3",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "Review the resolution proposals and identify the minimum human decisions required before revising DOCSYNC documents. Prioritize: 1. Safe, authorized document-rework and security-audit workflow. 2. D19 candidate-mapping rule (compare both options). 3. NF-1 diff source and untracked files. 4. P4 all-or-nothing patch behavior. 5. P8 binary and size-counting rules. 6. Approval-status reconciliation. Recommend conservative defaults and flag trade-offs. Verify actual agent permissions before suggesting changes. Do not edit files, change statuses, implement code, or commit. Return only a concise decision list.",
+      "project": "<redacted>",
+      "branch": "feature/docsync-pipeline",
+      "startTime": 1792644558316,
+      "durationMs": 28830493,
+      "turns": 105,
+      "fileOps": 48,
+      "linesAdded": 4368,
+      "linesRemoved": 27,
+      "linesModified": 0,
+      "netLines": 4341,
+      "filesChanged": 40,
+      "filesWritten": 40,
+      "filesEdited": 4,
+      "toolCallsTotal": 138,
+      "toolCallsSuccess": 134,
+      "toolCallsFailure": 4,
+      "models": [
+        "claude-sonnet-5-5",
+        "<synthetic>"
+      ],
+      "languages": [
+        "python",
+        "markdown",
+        "json"
+      ],
+      "tools": [
+        {
+          "toolName": "Bash",
+          "totalCalls": 48,
+          "successCount": 44,
+          "failureCount": 4,
+          "successRate": 91.66666666666666
+        },
+        {
+          "toolName": "Write",
+          "totalCalls": 41,
+          "successCount": 41,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Read",
+          "totalCalls": 25,
+          "successCount": 25,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Edit",
+          "totalCalls": 19,
+          "successCount": 19,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Grep",
+          "totalCalls": 4,
+          "successCount": 4,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Glob",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0,
+          "successRate": 100
+        }
+      ],
+      "tokens": {
+        "input": 208,
+        "output": 304853,
+        "cacheRead": 29556224,
+        "cacheCreation": 965434,
+        "cacheCreation1h": 965434,
+        "total": 30826719
+      },
+      "costUSD": 12.8219268,
+      "cacheReadCostUSD": 5.9112448,
+      "perModelCost": [
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 34,
+            "output": 69709,
+            "cacheRead": 3794336,
+            "cacheCreation": 570484,
+            "cacheCreation1h": 570484,
+            "total": 4434563
+          },
+          "costUSD": 3.7379612,
+          "unpriced": false
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 174,
+            "output": 235144,
+            "cacheRead": 25761888,
+            "cacheCreation": 394950,
+            "cacheCreation1h": 394950,
+            "total": 26392156
+          },
+          "costUSD": 9.0839656,
+          "unpriced": false
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "<redacted>",
+      "costSeries": [
+        {
+          "t": 1792644995956,
+          "cost": 0.142346,
+          "tokens": 35235
+        },
+        {
+          "t": 1792645008628,
+          "cost": 0.2244064,
+          "tokens": 156177
+        },
+        {
+          "t": 1792645958662,
+          "cost": 0.3144594,
+          "tokens": 273946
+        },
+        {
+          "t": 1792646509820,
+          "cost": 0.4269656,
+          "tokens": 473539
+        },
+        {
+          "t": 1792646987363,
+          "cost": 0.7010612,
+          "tokens": 732944
+        },
+        {
+          "t": 1792647037913,
+          "cost": 0.8382604,
+          "tokens": 953995
+        },
+        {
+          "t": 1792647125516,
+          "cost": 1.1112976,
+          "tokens": 1324717
+        },
+        {
+          "t": 1792647184042,
+          "cost": 1.2956320000000001,
+          "tokens": 1595869
+        },
+        {
+          "t": 1792647214924,
+          "cost": 1.4165880000000002,
+          "tokens": 2011515
+        },
+        {
+          "t": 1792647249834,
+          "cost": 1.5502380000000002,
+          "tokens": 2438885
+        },
+        {
+          "t": 1792647960194,
+          "cost": 1.8466010000000004,
+          "tokens": 2769601
+        },
+        {
+          "t": 1792648143599,
+          "cost": 2.3680144,
+          "tokens": 3370913
+        },
+        {
+          "t": 1792648166214,
+          "cost": 2.5160878,
+          "tokens": 3981995
+        },
+        {
+          "t": 1792648185043,
+          "cost": 2.7056380000000004,
+          "tokens": 4423225
+        },
+        {
+          "t": 1792650401659,
+          "cost": 3.0651914000000002,
+          "tokens": 5134741
+        },
+        {
+          "t": 1792650909329,
+          "cost": 3.3190202,
+          "tokens": 5906959
+        },
+        {
+          "t": 1792651077025,
+          "cost": 3.451131,
+          "tokens": 6430013
+        },
+        {
+          "t": 1792651223706,
+          "cost": 3.9207026000000003,
+          "tokens": 7272504
+        },
+        {
+          "t": 1792651259246,
+          "cost": 4.1909454,
+          "tokens": 8169270
+        },
+        {
+          "t": 1792651947139,
+          "cost": 4.4424774000000005,
+          "tokens": 8794309
+        },
+        {
+          "t": 1792651992921,
+          "cost": 4.6871712,
+          "tokens": 9749151
+        },
+        {
+          "t": 1792652767043,
+          "cost": 4.8231866000000005,
+          "tokens": 10391035
+        },
+        {
+          "t": 1792652793070,
+          "cost": 5.039008600000001,
+          "tokens": 11360368
+        },
+        {
+          "t": 1792653045208,
+          "cost": 5.500884,
+          "tokens": 12384592
+        },
+        {
+          "t": 1792653069244,
+          "cost": 5.6666724,
+          "tokens": 13088412
+        },
+        {
+          "t": 1792653552526,
+          "cost": 6.2568444,
+          "tokens": 14227631
+        },
+        {
+          "t": 1792656876807,
+          "cost": 6.5796174,
+          "tokens": 15386542
+        },
+        {
+          "t": 1792656917016,
+          "cost": 6.8093302,
+          "tokens": 16175374
+        },
+        {
+          "t": 1792656953525,
+          "cost": 7.105334,
+          "tokens": 17373934
+        },
+        {
+          "t": 1792657155219,
+          "cost": 7.6614046,
+          "tokens": 18628524
+        },
+        {
+          "t": 1792657183603,
+          "cost": 7.8951816,
+          "tokens": 19485128
+        },
+        {
+          "t": 1792657508496,
+          "cost": 8.3088394,
+          "tokens": 20803721
+        },
+        {
+          "t": 1792657587422,
+          "cost": 8.7101524,
+          "tokens": 22152232
+        },
+        {
+          "t": 1792658098373,
+          "cost": 8.957309400000002,
+          "tokens": 23064224
+        },
+        {
+          "t": 1792658170978,
+          "cost": 9.391519800000001,
+          "tokens": 24466066
+        },
+        {
+          "t": 1792658230187,
+          "cost": 9.698731800000001,
+          "tokens": 25419572
+        },
+        {
+          "t": 1792658268067,
+          "cost": 10.068819600000001,
+          "tokens": 26876303
+        },
+        {
+          "t": 1792658364138,
+          "cost": 10.4079882,
+          "tokens": 28348855
+        },
+        {
+          "t": 1792662824614,
+          "cost": 12.487812,
+          "tokens": 29335991
+        },
+        {
+          "t": 1792662863402,
+          "cost": 12.821926800000002,
+          "tokens": 30826719
+        }
+      ],
+      "dispatches": [
+        {
+          "kind": "command",
+          "name": "list-agents",
+          "start": 1792666213102,
+          "durationMs": 0,
+          "id": "command:2d463daa-9c00-48de-8695-55cd7f21b04d:0",
+          "ownerAgentId": "207c3ca0-67bb-4191-8923-c3406bba19a3",
+          "relationshipStatus": "root",
+          "elapsedMs": 0,
+          "status": "completed",
+          "attributionStatus": "unavailable",
+          "attributionScope": "owner-window"
+        },
+        {
+          "kind": "command",
+          "name": "agents",
+          "start": 1792666317279,
+          "durationMs": 0,
+          "id": "command:6ad006e9-345c-49bc-875e-53e9898ce884:0",
+          "ownerAgentId": "207c3ca0-67bb-4191-8923-c3406bba19a3",
+          "relationshipStatus": "root",
+          "elapsedMs": 0,
+          "status": "completed",
+          "attributionStatus": "unavailable",
+          "attributionScope": "owner-window"
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": false,
+      "rootOwnCostUSD": 12.8219268,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "rootOwnTokens": {
+        "input": 208,
+        "output": 304853,
+        "cacheRead": 29556224,
+        "cacheCreation": 965434,
+        "cacheCreation1h": 965434,
+        "total": 30826719
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1792644995956,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.142346,
+          "tokens": 35235
+        },
+        {
+          "t": 1792644998611,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0125196,
+          "tokens": 35890
+        },
+        {
+          "t": 1792645002016,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0184764,
+          "tokens": 37774
+        },
+        {
+          "t": 1792645008628,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0510644,
+          "tokens": 47278
+        },
+        {
+          "t": 1792645030144,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0735514,
+          "tokens": 58540
+        },
+        {
+          "t": 1792645958662,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0165016,
+          "tokens": 59229
+        },
+        {
+          "t": 1792646292984,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0461236,
+          "tokens": 64708
+        },
+        {
+          "t": 1792646485899,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0155592,
+          "tokens": 65108
+        },
+        {
+          "t": 1792646509820,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0508234,
+          "tokens": 69777
+        },
+        {
+          "t": 1792646900655,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.026511,
+          "tokens": 71688
+        },
+        {
+          "t": 1792646931843,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0827156,
+          "tokens": 82258
+        },
+        {
+          "t": 1792646987363,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.164869,
+          "tokens": 105459
+        },
+        {
+          "t": 1792647030923,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.090391,
+          "tokens": 109923
+        },
+        {
+          "t": 1792647037913,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0468082,
+          "tokens": 111128
+        },
+        {
+          "t": 1792647082420,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1004796,
+          "tokens": 118933
+        },
+        {
+          "t": 1792647120397,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1203226,
+          "tokens": 125808
+        },
+        {
+          "t": 1792647125516,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.052235,
+          "tokens": 125981
+        },
+        {
+          "t": 1792647177505,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.11823,
+          "tokens": 135348
+        },
+        {
+          "t": 1792647184042,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0661044,
+          "tokens": 135804
+        },
+        {
+          "t": 1792647195266,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.036396,
+          "tokens": 137136
+        },
+        {
+          "t": 1792647210683,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0477558,
+          "tokens": 139123
+        },
+        {
+          "t": 1792647214924,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0368042,
+          "tokens": 139387
+        },
+        {
+          "t": 1792647224157,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.038481,
+          "tokens": 140420
+        },
+        {
+          "t": 1792647233812,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0441628,
+          "tokens": 142401
+        },
+        {
+          "t": 1792647249834,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0510062,
+          "tokens": 144549
+        },
+        {
+          "t": 1792647952283,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1759774,
+          "tokens": 161068
+        },
+        {
+          "t": 1792647960194,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1203856,
+          "tokens": 169648
+        },
+        {
+          "t": 1792648116548,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.31061,
+          "tokens": 198943
+        },
+        {
+          "t": 1792648132321,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1559736,
+          "tokens": 200615
+        },
+        {
+          "t": 1792648143599,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0548298,
+          "tokens": 201754
+        },
+        {
+          "t": 1792648152041,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0539168,
+          "tokens": 203180
+        },
+        {
+          "t": 1792648156489,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0451448,
+          "tokens": 203347
+        },
+        {
+          "t": 1792648166214,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0490118,
+          "tokens": 204555
+        },
+        {
+          "t": 1792648173579,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0890586,
+          "tokens": 214919
+        },
+        {
+          "t": 1792648185043,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1004916,
+          "tokens": 226311
+        },
+        {
+          "t": 1792648201017,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0658966,
+          "tokens": 228018
+        },
+        {
+          "t": 1792650302445,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0500152,
+          "tokens": 228664
+        },
+        {
+          "t": 1792650401659,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.2436416,
+          "tokens": 254834
+        },
+        {
+          "t": 1792650409637,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1160834,
+          "tokens": 255567
+        },
+        {
+          "t": 1792650425294,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.068482,
+          "tokens": 257329
+        },
+        {
+          "t": 1792650909329,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0692634,
+          "tokens": 259322
+        },
+        {
+          "t": 1792650921733,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0716106,
+          "tokens": 260823
+        },
+        {
+          "t": 1792651077025,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0605002,
+          "tokens": 262231
+        },
+        {
+          "t": 1792651126606,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1204698,
+          "tokens": 270233
+        },
+        {
+          "t": 1792651212205,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.2258108,
+          "tokens": 285599
+        },
+        {
+          "t": 1792651223706,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.123291,
+          "tokens": 286659
+        },
+        {
+          "t": 1792651235061,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.088759,
+          "tokens": 292579
+        },
+        {
+          "t": 1792651243890,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1009744,
+          "tokens": 301188
+        },
+        {
+          "t": 1792651259246,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0805094,
+          "tokens": 302999
+        },
+        {
+          "t": 1792651936565,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1515074,
+          "tokens": 312315
+        },
+        {
+          "t": 1792651947139,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1000246,
+          "tokens": 312724
+        },
+        {
+          "t": 1792651965015,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0909454,
+          "tokens": 317059
+        },
+        {
+          "t": 1792651979589,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.073376,
+          "tokens": 317646
+        },
+        {
+          "t": 1792651992921,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0803724,
+          "tokens": 320137
+        },
+        {
+          "t": 1792652761720,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.066099,
+          "tokens": 320372
+        },
+        {
+          "t": 1792652767043,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0699164,
+          "tokens": 321512
+        },
+        {
+          "t": 1792652778233,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0759932,
+          "tokens": 322783
+        },
+        {
+          "t": 1792652784925,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.070198,
+          "tokens": 323001
+        },
+        {
+          "t": 1792652793070,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0696308,
+          "tokens": 323549
+        },
+        {
+          "t": 1792652934829,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0689074,
+          "tokens": 324476
+        },
+        {
+          "t": 1792653039145,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.2606286,
+          "tokens": 349720
+        },
+        {
+          "t": 1792653045208,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1323394,
+          "tokens": 350028
+        },
+        {
+          "t": 1792653053048,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0760664,
+          "tokens": 350797
+        },
+        {
+          "t": 1792653069244,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.089722,
+          "tokens": 353023
+        },
+        {
+          "t": 1792653520779,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.3100122,
+          "tokens": 377969
+        },
+        {
+          "t": 1792653532509,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1732634,
+          "tokens": 378944
+        },
+        {
+          "t": 1792653552526,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1068964,
+          "tokens": 382306
+        },
+        {
+          "t": 1792653557581,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.086689,
+          "tokens": 382473
+        },
+        {
+          "t": 1792653578179,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.100419,
+          "tokens": 385037
+        },
+        {
+          "t": 1792656876807,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.135665,
+          "tokens": 391401
+        },
+        {
+          "t": 1792656883465,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1009452,
+          "tokens": 391618
+        },
+        {
+          "t": 1792656917016,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1287676,
+          "tokens": 397214
+        },
+        {
+          "t": 1792656922887,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0985574,
+          "tokens": 397433
+        },
+        {
+          "t": 1792656945631,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1065364,
+          "tokens": 400454
+        },
+        {
+          "t": 1792656953525,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.09091,
+          "tokens": 400673
+        },
+        {
+          "t": 1792657064539,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.2078904,
+          "tokens": 413569
+        },
+        {
+          "t": 1792657070667,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1321968,
+          "tokens": 413778
+        },
+        {
+          "t": 1792657155219,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.2159834,
+          "tokens": 427243
+        },
+        {
+          "t": 1792657171665,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1436198,
+          "tokens": 428113
+        },
+        {
+          "t": 1792657183603,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0901572,
+          "tokens": 428491
+        },
+        {
+          "t": 1792657491981,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1890706,
+          "tokens": 438973
+        },
+        {
+          "t": 1792657503112,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1325898,
+          "tokens": 439703
+        },
+        {
+          "t": 1792657508496,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0919974,
+          "tokens": 439917
+        },
+        {
+          "t": 1792657559855,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.165794,
+          "tokens": 448234
+        },
+        {
+          "t": 1792657568192,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1227676,
+          "tokens": 448806
+        },
+        {
+          "t": 1792657587422,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1127514,
+          "tokens": 451471
+        },
+        {
+          "t": 1792658017395,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0972658,
+          "tokens": 452487
+        },
+        {
+          "t": 1792658098373,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1498912,
+          "tokens": 459505
+        },
+        {
+          "t": 1792658131025,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1614132,
+          "tokens": 464292
+        },
+        {
+          "t": 1792658144082,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1308248,
+          "tokens": 466438
+        },
+        {
+          "t": 1792658170978,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1419724,
+          "tokens": 471112
+        },
+        {
+          "t": 1792658176524,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.114164,
+          "tokens": 471845
+        },
+        {
+          "t": 1792658230187,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.193048,
+          "tokens": 481661
+        },
+        {
+          "t": 1792658235375,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1353688,
+          "tokens": 482081
+        },
+        {
+          "t": 1792658259674,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1286586,
+          "tokens": 487223
+        },
+        {
+          "t": 1792658268067,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1060604,
+          "tokens": 487427
+        },
+        {
+          "t": 1792658306500,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1128366,
+          "tokens": 489132
+        },
+        {
+          "t": 1792658349177,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1126332,
+          "tokens": 490896
+        },
+        {
+          "t": 1792658364138,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1136988,
+          "tokens": 492524
+        },
+        {
+          "t": 1792662818214,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 1.97311,
+          "tokens": 492902
+        },
+        {
+          "t": 1792662824614,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1067138,
+          "tokens": 494234
+        },
+        {
+          "t": 1792662839925,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1173648,
+          "tokens": 496260
+        },
+        {
+          "t": 1792662850119,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1087836,
+          "tokens": 496678
+        },
+        {
+          "t": 1792662863402,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1079664,
+          "tokens": 497790
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}

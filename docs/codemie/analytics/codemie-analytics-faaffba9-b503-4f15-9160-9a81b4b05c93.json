@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-23T18:00:26.832Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 303000,
+      "turns": 5,
+      "files": 2,
+      "netLines": 12,
+      "toolCallsTotal": 5,
+      "toolSuccessRate": 100,
+      "totalCostUSD": 0.20623399999999997,
+      "cacheReadCostUSD": 0.030112,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "<redacted>",
+    "periodStart": "2026-10-23T17:55:19.572Z",
+    "periodEnd": "2026-10-23T18:00:22.572Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "faaffba9-b503-4f15-9160-9a81b4b05c93",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "Update `orchestrator.md` to make `impl-log/` maintenance mandatory. - Log each task at start, after implementation/audit, and after my sign-off. - Record changes, test results and skips, security findings, limitations, verification status, and approval. - Preserve previous attempts; append corrections. - The orchestrator owns and updates phase logs. - Keep `pipeline-state.md` for current status and `impl-log/` for detailed history. - Never fabricate evidence or claim unverified results are verified. - Update the log before starting the next task. - Make only necessary changes. Do not modify approved planning documents, start T10, stage, or commit. Report the changes and wait for my sign-off.",
+      "project": "<redacted>",
+      "branch": "feature/docsync-pipeline",
+      "startTime": 1792778119572,
+      "durationMs": 303000,
+      "turns": 5,
+      "fileOps": 2,
+      "linesAdded": 12,
+      "linesRemoved": 0,
+      "linesModified": 0,
+      "netLines": 12,
+      "filesChanged": 1,
+      "filesWritten": 0,
+      "filesEdited": 1,
+      "toolCallsTotal": 5,
+      "toolCallsSuccess": 5,
+      "toolCallsFailure": 0,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "languages": [
+        "markdown"
+      ],
+      "tools": [
+        {
+          "toolName": "Glob",
+          "totalCalls": 2,
+          "successCount": 2,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Read",
+          "totalCalls": 2,
+          "successCount": 2,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Edit",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0,
+          "successRate": 100
+        }
+      ],
+      "tokens": {
+        "input": 10,
+        "output": 1657,
+        "cacheRead": 150560,
+        "cacheCreation": 39883,
+        "cacheCreation1h": 39883,
+        "total": 192110
+      },
+      "costUSD": 0.20623399999999997,
+      "cacheReadCostUSD": 0.030112,
+      "perModelCost": [
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 6,
+            "output": 891,
+            "cacheRead": 70911,
+            "cacheCreation": 39136,
+            "cacheCreation1h": 39136,
+            "total": 110944
+          },
+          "costUSD": 0.17964819999999998,
+          "unpriced": false
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 4,
+            "output": 766,
+            "cacheRead": 79649,
+            "cacheCreation": 747,
+            "cacheCreation1h": 747,
+            "total": 81166
+          },
+          "costUSD": 0.026585800000000003,
+          "unpriced": false
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "<redacted>",
+      "costSeries": [
+        {
+          "t": 1792778129247,
+          "cost": 0.1419,
+          "tokens": 35314
+        },
+        {
+          "t": 1792778131166,
+          "cost": 0.1525668,
+          "tokens": 71184
+        },
+        {
+          "t": 1792778136532,
+          "cost": 0.1796482,
+          "tokens": 110944
+        },
+        {
+          "t": 1792778145810,
+          "cost": 0.1969534,
+          "tokens": 151459
+        },
+        {
+          "t": 1792778192312,
+          "cost": 0.206234,
+          "tokens": 192110
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": true,
+      "rootOwnCostUSD": 0.20623399999999997,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "observedEnd": 1792778422572,
+      "rootOwnTokens": {
+        "input": 10,
+        "output": 1657,
+        "cacheRead": 150560,
+        "cacheCreation": 39883,
+        "cacheCreation1h": 39883,
+        "total": 192110
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1792778129247,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1419,
+          "tokens": 35314
+        },
+        {
+          "t": 1792778131166,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0106668,
+          "tokens": 35870
+        },
+        {
+          "t": 1792778136532,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0270814,
+          "tokens": 39760
+        },
+        {
+          "t": 1792778145810,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0173052,
+          "tokens": 40515
+        },
+        {
+          "t": 1792778192312,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0092806,
+          "tokens": 40651
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}
