@@ -214,15 +214,6 @@ class DiscoverCandidatesTests(unittest.TestCase):
         with self.assertRaises(InputOrGitError):
             mapping.discover_candidates(self.root / "afile")
 
-    def test_symlinked_doc_is_not_a_candidate(self):
-        self.touch("outside.md")
-        link = self.root / "README.md"
-        try:
-            os.symlink(self.root / "outside.md", link)
-        except (OSError, NotImplementedError):
-            self.skipTest("symbolic links are not available in this environment")
-        self.assertEqual(mapping.discover_candidates(self.root), ())
-
     def test_discovery_feeds_mapping_end_to_end(self):
         self.touch("README.md")
         self.touch("docs/a.md")

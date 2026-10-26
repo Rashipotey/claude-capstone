@@ -1,10 +1,16 @@
-"""Regression tests for code review M-1: bounded Git output, bounded file reads."""
+"""Tests for D12/D14 (no repository-size and no per-file limit; the diff cap is the only limit).
+
+History: code review M-1 had added a 64 MiB Git stdout cap and a 4,000,000-byte reader cap.
+Both were removed. What replaced them: the size gate runs BEFORE the diff text is fetched
+(``retrieve_diff(gate=...)``), and a MemoryError ends the run as the unexpected failure (12).
+Kept and tested here: stderr bound, timeout, no-hang pipe handling, exit-code passthrough,
+the allow-list, and ``proposal.MAX_ORIGINAL_CHARS``.
+"""
 
 import contextlib
 import io
 import os
 import signal
-import stat
 import subprocess
 import sys
 import tempfile
@@ -15,10 +21,12 @@ from pathlib import Path
 from unittest import mock
 
 from docsync import analysis, cli, gitadapter, proposal
-from docsync.contracts import ExitCode, ProposedEdit, OverCapError
+from docsync.contracts import ExitCode, ProposedEdit
 from tests.helpers.gitrepo import TempGitRepo, git_available
 
 SENTINEL = "BOUNDSENTINEL"
+MIB = 1024 * 1024
+MemoryErrorText = "MEMORYERRORSECRETTEXT"  # must never reach any output
 
 
 def writer_argv(total=None):
@@ -35,57 +43,27 @@ def writer_argv(total=None):
 
 class BoundedRunnerTests(unittest.TestCase):
     def run_bounded(self, argv, **kw):
-        return gitadapter._bounded_run(argv, shell=False, stdin=subprocess.DEVNULL, timeout=60, **kw)
+        return gitadapter._bounded_run(argv, shell=False, stdin=subprocess.DEVNULL, timeout=120, **kw)
 
-    def test_constants_are_documented_values(self):
-        self.assertEqual(gitadapter.MAX_STDOUT_BYTES, 64 * 1024 * 1024)
+    def test_removed_stdout_cap_names_no_longer_exist(self):
+        self.assertFalse(hasattr(gitadapter, "MAX_STDOUT_BYTES"))
+        self.assertFalse(hasattr(gitadapter, "GitOutputOverCapError"))
+        self.assertFalse(hasattr(analysis, "MAX_READ_BYTES"))
+
+    def test_stderr_bound_is_documented_value(self):
         self.assertEqual(gitadapter.MAX_STDERR_BYTES, 64 * 1024)
 
-    def test_endless_writer_is_stopped_at_the_bound_and_its_handle_is_terminated(self):
-        procs = []
-        real_popen = subprocess.Popen
-
-        def spy(*a, **k):
-            p = real_popen(*a, **k)
-            procs.append(p)
-            return p
-
-        with mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 8192), \
-                mock.patch.object(subprocess, "Popen", spy):
-            with self.assertRaises(OverCapError) as ctx:
-                self.run_bounded(writer_argv())
-        self.assertIsInstance(ctx.exception, gitadapter.GitOutputOverCapError)
-        self.assertEqual(ctx.exception.exit_code, ExitCode.OVER_CAP)
-        self.assertEqual(len(procs), 1)
-        self.assertIsNotNone(procs[0].poll(), "the child must have been terminated")
-
-    def test_nothing_beyond_the_bound_plus_one_chunk_is_accumulated(self):
-        kept = []
-        real_drain = gitadapter._drain
-
-        def spy(pipe, limit, sink, exceeded):
-            kept.append(sink)
-            return real_drain(pipe, limit, sink, exceeded)
-
-        with mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 8192), \
-                mock.patch.object(gitadapter, "_CHUNK", 1000), \
-                mock.patch.object(gitadapter, "_drain", spy):
-            with self.assertRaises(gitadapter.GitOutputOverCapError):
-                self.run_bounded(writer_argv())
-        stdout_sink = kept[0]
-        self.assertGreater(len(stdout_sink), 0, "accumulation must actually be exercised")
-        self.assertLessEqual(sum(len(c) for c in stdout_sink), 8192)
-
-    def test_output_exactly_at_the_bound_is_returned(self):
-        with mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 4096):
-            proc = self.run_bounded(writer_argv(4096))
+    def test_tens_of_mebibytes_of_stdout_are_returned_in_full(self):
+        total = 40 * MIB  # far above the old 64 MiB-class bound's neighbours; no cap applies
+        proc = self.run_bounded(writer_argv(total))
         self.assertEqual(proc.returncode, 0)
-        self.assertEqual(len(proc.stdout), 4096)
+        self.assertEqual(len(proc.stdout), total)
 
-    def test_one_byte_over_the_bound_is_over_cap(self):
-        with mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 4095):
-            with self.assertRaises(gitadapter.GitOutputOverCapError):
-                self.run_bounded(writer_argv(4096))
+    def test_large_stdout_is_returned_in_full_through_the_adapter_runner(self):
+        total = 20 * MIB
+        big = subprocess.CompletedProcess([], 0, b"y" * total, b"")
+        adapter = gitadapter.GitAdapter(".", redactor=lambda s: s, runner=lambda argv, **k: big)
+        self.assertEqual(len(adapter.run(gitadapter.TEMPLATES["diff-text"])), total)
 
     def test_stderr_is_bounded_and_the_child_still_finishes(self):
         code = "import sys; sys.stderr.write('e' * 300000); sys.stdout.write('ok')"
@@ -95,25 +73,60 @@ class BoundedRunnerTests(unittest.TestCase):
         self.assertEqual(len(proc.stderr), 1000)
 
     def test_timeout_still_raises_and_kills_the_child(self):
-        with self.assertRaises(subprocess.TimeoutExpired):
-            gitadapter._bounded_run([sys.executable, "-c", "import time; time.sleep(60)"],
-                                    shell=False, stdin=subprocess.DEVNULL, timeout=0.5)
+        procs = []
+        real_popen = subprocess.Popen
+
+        def spy(*a, **k):
+            p = real_popen(*a, **k)
+            procs.append(p)
+            return p
+
+        with mock.patch.object(subprocess, "Popen", spy):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                gitadapter._bounded_run([sys.executable, "-c", "import time; time.sleep(60)"],
+                                        shell=False, stdin=subprocess.DEVNULL, timeout=0.5)
+        self.assertEqual(len(procs), 1)
+        self.assertIsNotNone(procs[0].poll(), "the child must have been killed by its handle")
 
     def test_exit_code_is_returned(self):
         proc = self.run_bounded([sys.executable, "-c", "import sys; sys.exit(3)"])
         self.assertEqual(proc.returncode, 3)
 
-    def test_error_message_is_fixed_and_holds_no_data(self):
-        text = str(gitadapter.GitOutputOverCapError())
-        self.assertNotIn(SENTINEL, text)
-        self.assertIn("over the size limit", text)
+    def test_memory_error_while_accumulating_kills_the_child_and_raises(self):
+        procs = []
+        real_popen = subprocess.Popen
+        real_drain = gitadapter._drain
 
-    def test_adapter_backstop_for_an_injected_runner(self):
-        big = subprocess.CompletedProcess([], 0, b"y" * 20, b"")
-        with mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 10):
-            a = gitadapter.GitAdapter(".", redactor=lambda s: s, runner=lambda argv, **k: big)
-            with self.assertRaises(gitadapter.GitOutputOverCapError):
-                a.run(gitadapter.TEMPLATES["diff-text"])
+        def spy_popen(*a, **k):
+            p = real_popen(*a, **k)
+            procs.append(p)
+            return p
+
+        class Exploding(list):
+            def append(self, item):
+                raise MemoryError()
+
+        def spy_drain(pipe, limit, sink, failed):
+            # stdout is the drain without a limit; make its accumulation run out of memory
+            return real_drain(pipe, limit, Exploding() if limit is None else sink, failed)
+
+        started = time.monotonic()
+        with mock.patch.object(subprocess, "Popen", spy_popen), \
+                mock.patch.object(gitadapter, "_drain", spy_drain):
+            with self.assertRaises(MemoryError) as ctx:
+                self.run_bounded(writer_argv())  # endless writer: would block if nobody reads
+        self.assertEqual(str(ctx.exception), "")
+        self.assertLess(time.monotonic() - started, 30)
+        self.assertEqual(len(procs), 1)
+        self.assertIsNotNone(procs[0].poll(), "the child must have been killed by its handle")
+
+    def test_memory_error_in_the_runner_is_not_turned_into_a_git_error(self):
+        def runner(argv, **k):
+            raise MemoryError()
+
+        adapter = gitadapter.GitAdapter(".", redactor=lambda s: s, runner=runner)
+        with self.assertRaises(MemoryError):
+            adapter.run(gitadapter.TEMPLATES["diff-text"])
 
     def test_allow_list_is_unchanged(self):
         self.assertEqual(len(gitadapter.TEMPLATES), 6)
@@ -189,78 +202,341 @@ class PipeHeldByDescendantTests(unittest.TestCase):
         self.assertIsInstance(box["result"], subprocess.TimeoutExpired, box["result"])
         self.assertLess(box["elapsed"], 1 + 2 + 2 + 3)
 
-    def test_over_cap_returns_even_if_a_grandchild_holds_the_pipes(self):
-        argv = holder_argv(self.pid_file, "while True: sys.stdout.buffer.write(b'x' * 1024); sys.stdout.flush()")
-        with mock.patch.object(gitadapter, "_GRACE_SECONDS", 2), \
-                mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 8192):
-            box = self._run(argv, timeout=30)
-        self.assertIsInstance(box["result"], gitadapter.GitOutputOverCapError, box["result"])
-        self.assertLess(box["elapsed"], 2 + 2 + 3)
+
+# --------------------------------------------------------------- pre-fetch gate (A1)
+def _raw_record(path):
+    return ":100644 100644 %s %s M\0%s\0" % ("a" * 40, "b" * 40, path)
+
+
+class FakeGit:
+    """An injectable runner returning canned output for the allow-listed templates."""
+
+    def __init__(self, paths=("a.py",), added=1, deleted=0, cwd=None):
+        self.paths = paths
+        self.added = added
+        self.deleted = deleted
+        self.cwd = cwd
+        self.names = []
+
+    def __call__(self, argv, **kw):
+        name = gitadapter.match_template(argv[1:])
+        self.names.append(name)
+        out = b""
+        if name == "rev-parse-toplevel":
+            out = (self.cwd.replace("\\", "/") + "\n").encode()
+        elif name == "config-list":
+            out = b"file:.git/config\tcore.repositoryformatversion=0\n"
+        elif name == "diff-raw":
+            out = "".join(_raw_record(p) for p in self.paths).encode()
+        elif name == "diff-numstat":
+            out = "".join("%d\t%d\t%s\0" % (self.added, self.deleted, p) for p in self.paths).encode()
+        elif name == "diff-text":
+            out = b"diff text\n"
+        elif name == "ls-files-others":
+            out = b"new.txt\0"
+        return subprocess.CompletedProcess(argv, 0, out, b"")
+
+
+class GateTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.cwd = os.path.realpath(self._tmp.name)
+
+    def adapter(self, fake):
+        return gitadapter.GitAdapter(self.cwd, redactor=lambda s: s, runner=fake)
+
+    def test_gate_runs_after_raw_and_numstat_and_before_text_and_untracked(self):
+        fake = FakeGit(paths=("a.py", "b.py"), cwd=self.cwd)
+        seen = []
+
+        def gate(files):
+            seen.append((tuple(fake.names), files))
+
+        result = self.adapter(fake).retrieve_diff(gate=gate)
+        self.assertEqual(len(seen), 1)
+        before, files = seen[0]
+        self.assertEqual(before, ("rev-parse-toplevel", "config-list", "diff-raw", "diff-numstat"))
+        self.assertIsInstance(files, tuple)
+        self.assertEqual([f.path for f in files], ["a.py", "b.py"])
+        self.assertEqual(fake.names[-2:], ["diff-text", "ls-files-others"])
+        self.assertEqual(result.diff_text, "diff text\n")
+        self.assertEqual(result.untracked, ("new.txt",))
+
+    def test_a_raising_gate_propagates_unchanged_and_no_text_is_fetched(self):
+        fake = FakeGit(cwd=self.cwd)
+        marker = RuntimeError("from the gate")
+
+        def gate(files):
+            raise marker
+
+        with self.assertRaises(RuntimeError) as ctx:
+            self.adapter(fake).retrieve_diff(gate=gate)
+        self.assertIs(ctx.exception, marker)
+        self.assertNotIn("diff-text", fake.names)
+        self.assertNotIn("ls-files-others", fake.names)
+
+    def test_no_gate_is_the_old_behavior(self):
+        fake = FakeGit(cwd=self.cwd)
+        result = self.adapter(fake).retrieve_diff()
+        self.assertEqual(fake.names, ["rev-parse-toplevel", "config-list", "diff-raw",
+                                      "diff-numstat", "diff-text", "ls-files-others"])
+        self.assertEqual([f.path for f in result.files], ["a.py"])
+        fake2 = FakeGit(cwd=self.cwd)
+        self.adapter(fake2).retrieve_diff(gate=None)
+        self.assertEqual(fake2.names, fake.names)
+
+    def test_a_gate_that_is_not_callable_is_a_type_error_before_any_git_call(self):
+        fake = FakeGit(cwd=self.cwd)
+        with self.assertRaises(TypeError):
+            self.adapter(fake).retrieve_diff(gate="no")
+        self.assertEqual(fake.names, [])
+
+    def test_empty_change_set_still_calls_the_gate_with_no_records(self):
+        fake = FakeGit(paths=(), cwd=self.cwd)
+        seen = []
+        result = self.adapter(fake).retrieve_diff(gate=seen.append)
+        self.assertEqual(seen, [()])
+        self.assertTrue(result.is_empty)
+
+
+# ------------------------------------------------------- main(): helpers and fixtures
+def spy_on_git_calls(calls):
+    real_run = gitadapter.GitAdapter.run
+
+    def run(self, args):
+        calls.append(gitadapter.match_template(args))
+        return real_run(self, args)
+
+    return mock.patch.object(gitadapter.GitAdapter, "run", run)
+
+
+class MainBase(unittest.TestCase):
+    def setUp(self):
+        self._origin = os.getcwd()
+        self.work = tempfile.mkdtemp(prefix="docsync_bounds_")
+        self.addCleanup(lambda: __import__("shutil").rmtree(self.work, ignore_errors=True))
+        self.addCleanup(os.chdir, self._origin)
+
+    @property
+    def patch_path(self):
+        return os.path.join(self.work, "output", "docsync.patch")
+
+    def main(self, repo, *patches):
+        out, err = io.StringIO(), io.StringIO()
+        os.chdir(self.work)
+        with contextlib.ExitStack() as stack:
+            for p in patches:
+                stack.enter_context(p)
+            stack.enter_context(contextlib.redirect_stdout(out))
+            stack.enter_context(contextlib.redirect_stderr(err))
+            code = cli.main([str(repo.path)])
+        return code, out.getvalue() + err.getvalue()
+
+    def small_repo(self):
+        repo = TempGitRepo({"README.md": "# Demo\n\nText.\n", "pkg.py": "x = 1\n"})
+        self.addCleanup(repo.cleanup)
+        repo.write("pkg.py", "x = 1\n\n\ndef added_function(a):\n    return a\n")
+        return repo
 
 
 @unittest.skipUnless(git_available(), "git is not available")
-class MainOverCapTests(unittest.TestCase):
-    def test_main_exits_5_when_the_diff_text_reaches_the_bound(self):
-        origin = os.getcwd()
-        work = tempfile.mkdtemp(prefix="docsync_bounds_")
-        self.addCleanup(lambda: __import__("shutil").rmtree(work, ignore_errors=True))
+class MainOverCapBeforeFetchTests(MainBase):
+    def test_more_than_50_files_exits_5_with_counts_and_never_requests_diff_text(self):
+        repo = TempGitRepo({"README.md": "# Demo\n"})
+        self.addCleanup(repo.cleanup)
+        for i in range(51):
+            repo.write("src/m%02d.py" % i, "v = %d\n" % i)
+        repo.commit("many")
+        for i in range(51):
+            repo.write("src/m%02d.py" % i, "v = %d\nw = %d\n" % (i, i))
+        calls = []
+        with spy_on_git_calls(calls):
+            code, text = self.main(repo)
+        self.assertEqual(code, int(ExitCode.OVER_CAP), text)
+        self.assertIn("51 files", text)
+        self.assertIn("51 changed lines", text)
+        self.assertIn("diff-numstat", calls)
+        self.assertNotIn("diff-text", calls)
+        self.assertNotIn("ls-files-others", calls)
+        self.assertFalse(os.path.exists(self.patch_path))
+
+    def test_more_than_2000_changed_lines_exits_5_with_counts_and_never_requests_diff_text(self):
         repo = TempGitRepo({"README.md": "# Demo\n", "pkg.py": "x = 1\n"})
         self.addCleanup(repo.cleanup)
+        repo.write("pkg.py", "".join("v%d = %d\n" % (i, i) for i in range(2000)))  # +2000 -1
+        calls = []
+        with spy_on_git_calls(calls):
+            code, text = self.main(repo)
+        self.assertEqual(code, int(ExitCode.OVER_CAP), text)
+        self.assertIn("1 files", text)
+        self.assertIn("2001 changed lines", text)
+        self.assertNotIn("diff-text", calls)
+        self.assertFalse(os.path.exists(self.patch_path))
+
+    def test_unsupported_entry_still_wins_over_over_cap_and_is_exit_6(self):
+        repo = TempGitRepo({"README.md": "# Demo\n", "pkg.py": "x = 1\n", "img.bin": b"\x00\x01"})
+        self.addCleanup(repo.cleanup)
         repo.write("pkg.py", "".join("v%d = %d\n" % (i, i) for i in range(2000)))
+        repo.write("img.bin", b"\x00\x02\x03")
+        calls = []
+        with spy_on_git_calls(calls):
+            code, text = self.main(repo)
+        self.assertEqual(code, int(ExitCode.UNSUPPORTED_ENTRY), text)
+        self.assertNotIn("diff-text", calls)
+        self.assertFalse(os.path.exists(self.patch_path))
+
+    def test_a_diff_at_the_cap_is_fetched_and_processed(self):
+        repo = self.small_repo()
+        calls = []
+        with spy_on_git_calls(calls):
+            code, text = self.main(repo)
+        self.assertEqual(code, int(ExitCode.OK), text)
+        self.assertIn("diff-text", calls)
+        self.assertTrue(os.path.exists(self.patch_path))
+
+
+# ------------------------------------------------------------ MemoryError (A3)
+@unittest.skipUnless(git_available(), "git is not available")
+class MainMemoryErrorTests(MainBase):
+    LEAK = MemoryErrorText
+
+    def assert_unexpected(self, code, text, stage):
+        self.assertEqual(code, int(ExitCode.UNEXPECTED), text)
+        self.assertIn(stage, text)
+        self.assertNotIn(self.LEAK, text)
+        self.assertNotIn("MemoryError", text)
+        self.assertFalse(os.path.exists(self.patch_path))
+
+    def test_memory_error_in_the_git_runner(self):
+        repo = self.small_repo()
+        real_run = gitadapter.GitAdapter.run
+
+        def run(self_, args):
+            if gitadapter.match_template(args) == "diff-text":
+                raise MemoryError(MemoryErrorText)
+            return real_run(self_, args)
+
+        code, text = self.main(repo, mock.patch.object(gitadapter.GitAdapter, "run", run))
+        self.assert_unexpected(code, text, "gitadapter")
+
+    def test_memory_error_in_the_reader(self):
+        repo = self.small_repo()
+
+        def factory(root):
+            def read_text(path):
+                raise MemoryError(MemoryErrorText)
+            return read_text
+
+        code, text = self.main(repo, mock.patch.object(analysis, "working_tree_reader", factory))
+        self.assertEqual(code, int(ExitCode.UNEXPECTED), text)
+        self.assertTrue("analysis" in text or "proposal" in text, text)
+        self.assertNotIn(self.LEAK, text)
+        self.assertFalse(os.path.exists(self.patch_path))
+
+    def test_memory_error_in_the_reader_during_proposal(self):
+        repo = self.small_repo()
+        real = analysis.working_tree_reader
+        made = []
+
+        def factory(root):
+            made.append(root)
+            if len(made) == 1:  # the analysis stage reads normally
+                return real(root)
+
+            def read_text(path):
+                raise MemoryError(MemoryErrorText)
+            return read_text
+
+        code, text = self.main(repo, mock.patch.object(analysis, "working_tree_reader", factory))
+        self.assert_unexpected(code, text, "proposal")
+
+    def test_memory_error_in_analysis(self):
+        repo = self.small_repo()
+
+        def analyze(*a, **k):
+            raise MemoryError(MemoryErrorText)
+
+        code, text = self.main(repo, mock.patch.object(analysis, "analyze", analyze))
+        self.assert_unexpected(code, text, "analysis")
+
+    def test_memory_error_in_proposal(self):
+        repo = self.small_repo()
+
+        def build(*a, **k):
+            raise MemoryError(MemoryErrorText)
+
+        code, text = self.main(repo, mock.patch.object(proposal, "build_proposals", build))
+        self.assert_unexpected(code, text, "proposal")
+
+    def test_memory_error_in_render(self):
+        repo = self.small_repo()
+        real = cli.report.render_report
+
+        def render(report_input, **k):
+            if report_input.outcome == ExitCode.OK:  # the success report only
+                raise MemoryError(MemoryErrorText)
+            return real(report_input, **k)
+
+        code, text = self.main(repo, mock.patch.object(cli.report, "render_report", render))
+        self.assert_unexpected(code, text, "render")
+
+    def test_memory_error_after_publish_rolls_the_patch_back(self):
+        repo = self.small_repo()
+        def emit(text):
+            raise MemoryError(MemoryErrorText)
+
         out, err = io.StringIO(), io.StringIO()
-        os.chdir(work)
-        try:
-            with mock.patch.object(gitadapter, "MAX_STDOUT_BYTES", 8192), \
-                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-                code = cli.main([str(repo.path)])
-        finally:
-            os.chdir(origin)
-        self.assertEqual(code, int(ExitCode.OVER_CAP), out.getvalue() + err.getvalue())
-        self.assertFalse(os.path.exists(os.path.join(work, "output", "docsync.patch")))
+        os.chdir(self.work)
+        with mock.patch.object(cli.report, "emit_report", emit), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = cli.main([str(repo.path)])
+        # emit failures are handled as "report could not be written": exit 12 and rollback
+        self.assertEqual(code, int(ExitCode.UNEXPECTED), out.getvalue() + err.getvalue())
+        self.assertFalse(os.path.exists(self.patch_path))
+        self.assertNotIn(self.LEAK, out.getvalue() + err.getvalue())
 
 
-class ReaderBoundTests(unittest.TestCase):
+# ----------------------------------------------------------- reader (A2) and proposal
+class ReaderTests(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)
         self.root = Path(self._tmp.name)
 
-    def test_bound_is_documented(self):
-        self.assertEqual(analysis.MAX_READ_BYTES, 4_000_000)
-        self.assertGreaterEqual(analysis.MAX_READ_BYTES, proposal.MAX_ORIGINAL_CHARS)
-
-    def test_file_at_the_bound_is_read_and_one_over_is_none(self):
-        (self.root / "at.md").write_bytes(b"a" * 20)
-        (self.root / "over.md").write_bytes(b"a" * 21)
-        with mock.patch.object(analysis, "MAX_READ_BYTES", 20):
-            read = analysis.working_tree_reader(self.root)
-            self.assertEqual(read("at.md"), "a" * 20)
-            self.assertIsNone(read("over.md"))
-
-    def test_read_is_bounded_even_if_stat_reports_small(self):
-        (self.root / "grew.md").write_bytes(b"a" * 50)
-        fake = mock.Mock(st_size=1, st_mode=stat.S_IFREG)
-        with mock.patch.object(analysis, "MAX_READ_BYTES", 20), \
-                mock.patch.object(Path, "stat", return_value=fake):
-            self.assertIsNone(analysis.working_tree_reader(self.root)("grew.md"))
+    def test_a_file_above_the_old_4_000_000_byte_bound_is_read_in_full(self):
+        size = 5_000_000
+        (self.root / "big.md").write_bytes(b"a" * size)
+        text = analysis.working_tree_reader(self.root)("big.md")
+        self.assertIsNotNone(text)
+        self.assertEqual(len(text), size)
 
     def test_other_behaviors_are_kept(self):
         (self.root / "crlf.md").write_bytes(b"a\r\nb\r\n")
         (self.root / "bad.md").write_bytes(b"\xff")
+        (self.root / "adir").mkdir()
         read = analysis.working_tree_reader(self.root)
-        self.assertEqual(read("crlf.md"), "a\r\nb\r\n")
-        self.assertIsNone(read("bad.md"))
-        self.assertIsNone(read("../x.md"))
-        self.assertIsNone(read("."))
+        self.assertEqual(read("crlf.md"), "a\r\nb\r\n")  # no newline translation
+        self.assertIsNone(read("bad.md"))               # strict UTF-8
+        self.assertIsNone(read("../x.md"))              # root-confined
+        self.assertIsNone(read("."))                    # not a regular file
+        self.assertIsNone(read("adir"))                 # not a regular file
+        self.assertIsNone(read("missing.md"))
 
-    def test_proposal_reports_not_found_for_an_oversized_document(self):
+    def test_invalid_utf8_is_rejected_even_in_a_large_file(self):
+        (self.root / "badbig.md").write_bytes(b"a" * 5_000_000 + b"\xff")
+        self.assertIsNone(analysis.working_tree_reader(self.root)("badbig.md"))
+
+    def test_proposal_still_skips_a_document_above_max_original_chars(self):
         (self.root / "docs").mkdir()
-        (self.root / "docs" / "big.md").write_bytes(b"a" * 21)
+        (self.root / "docs" / "big.md").write_bytes(b"a" * (proposal.MAX_ORIGINAL_CHARS + 1))
         edit = ProposedEdit(target="docs/big.md", reason="Document the change.", symbol_names=("f",))
-        with mock.patch.object(analysis, "MAX_READ_BYTES", 20):
-            result = proposal.build_proposals([edit], analysis.working_tree_reader(self.root))
+        result = proposal.build_proposals([edit], analysis.working_tree_reader(self.root))
         self.assertEqual(len(result.documents), 0)
-        self.assertEqual([s.reason for s in result.skipped], [proposal.SKIP_UNREADABLE])
+        self.assertEqual([s.reason for s in result.skipped], [proposal.SKIP_TOO_LARGE])
+
+    def test_max_original_chars_is_unchanged(self):
+        self.assertEqual(proposal.MAX_ORIGINAL_CHARS, 1_000_000)
 
 
 if __name__ == "__main__":

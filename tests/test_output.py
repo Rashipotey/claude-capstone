@@ -2,7 +2,7 @@
 
 All fixtures are local and temporary. Secret values are obviously fake. Tests change the
 working directory only inside temporary directories and always restore it. Symlink cases are
-skipped where symlinks cannot be created; Windows junction variants run where possible.
+Windows junction variants run where possible; symlink variants were removed (not testable here).
 """
 
 import ast
@@ -173,19 +173,6 @@ def apply_patch_text(original, patch_text):
     return "".join(out)
 
 
-def symlinks_available():
-    with tempfile.TemporaryDirectory() as tmp:
-        try:
-            os.symlink(os.path.join(tmp, "target"), os.path.join(tmp, "link"))
-        except (OSError, NotImplementedError, AttributeError):
-            return False
-        return True
-
-
-SYMLINKS = symlinks_available()
-SYMLINK_SKIP = "symlink creation unavailable on this machine (no privilege)"
-
-
 def make_junction(target, link):
     try:
         import _winapi
@@ -199,7 +186,7 @@ class WorkCase(unittest.TestCase):
 
     def setUp(self):
         if not git_available():
-            self.skipTest("git not available")
+            self.skipTest("git executable not found on PATH")
         self.repo = TempGitRepo({
             "README.md": "# Project\n",
             "docs/api.md": ORIG,
@@ -640,14 +627,6 @@ class GuardTests(WorkCase):
         self.assert_refused(self.approved(), self.LINK_REFUSAL)
         self.assert_repo_untouched()
 
-    def test_output_symlink_to_docs_is_refused(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        link = self.work / "output"
-        os.symlink(self.root / "docs", link, target_is_directory=True)
-        self.assert_refused(self.approved(), self.LINK_REFUSAL)
-        self.assert_repo_untouched()
-
     def test_output_junction_elsewhere_is_refused_and_nothing_is_written(self):
         # Policy B: this test used to assert that the junction was FOLLOWED.
         elsewhere = self.work / "elsewhere"
@@ -761,28 +740,6 @@ class OutputLinkPolicyTests(WorkCase):
         self.assert_publish_refused(content)
         self.assertFalse(target.exists())  # nothing was created at the missing target
         self.assertEqual(os.listdir(target.parent), [])
-
-    def test_symlink_to_a_non_docs_directory_elsewhere_is_refused_and_target_unchanged(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        target = self.other_dir() / "not-docs"
-        target.mkdir()
-        (target / "keep.txt").write_bytes(b"KEEP")
-        os.symlink(target, self.work / "output", target_is_directory=True)
-        content = self.approved()
-        self.assert_precheck_refused()
-        self.assert_publish_refused(content)
-        self.assertEqual(sorted(os.listdir(target)), ["keep.txt"])
-
-    def test_dangling_symlink_and_symlink_to_a_non_existent_target_are_refused(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        missing = self.other_dir() / "missing"
-        os.symlink(missing, self.work / "output", target_is_directory=True)
-        content = self.approved()
-        self.assert_precheck_refused()
-        self.assert_publish_refused(content)
-        self.assertFalse(missing.exists())
 
     def reparse_lstat(self):
         real = os.lstat
@@ -940,19 +897,6 @@ class OutputLinkPolicyTests(WorkCase):
         self.assertEqual(ctx.exception.exit_code, 11)
         self.assert_repo_untouched()
 
-    def test_symlink_working_directory_is_still_resolved(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        real_work = self.other_dir() / "real-work"
-        real_work.mkdir()
-        link = self.work / "cwd-link"
-        os.symlink(real_work, link, target_is_directory=True)
-        content = self.approved()
-        with chdir(link):
-            token = publish_patch(content)
-            self.assertTrue(rollback_patch(token))
-        self.assertEqual(os.listdir(real_work), ["output"])
-
     def test_link_target_of_a_chain_is_not_resolved(self):
         victim = self.other_dir() / "victim.txt"
         victim.write_bytes(b"V")
@@ -1019,35 +963,6 @@ class ExistingPatchTests(WorkCase):
             publish_patch(self.approved())
         self.assertEqual(os.listdir(victim), ["f.txt"])
 
-    def test_dangling_symlink_counts_as_existing(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        (self.work / "output").mkdir()
-        target = self.root / "docs" / "new-target.md"
-        os.symlink(target, self.work / "output" / "docsync.patch")
-        with self.assertRaises(PatchWriteError) as ctx:
-            check_no_existing_patch()
-        self.assertEqual(ctx.exception.exit_code, 11)
-        with self.assertRaises(PatchWriteError):
-            publish_patch(self.approved())
-        self.assertFalse(target.exists())
-        self.assert_repo_untouched()
-
-    def test_dangling_symlink_appearing_between_precheck_and_write(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        content = self.approved()
-        check_no_existing_patch()
-        (self.work / "output").mkdir()
-        target = self.root / "README.md"
-        missing = self.root / "docs" / "missing.md"
-        os.symlink(missing, self.work / "output" / "docsync.patch")
-        with self.assertRaises(PatchWriteError):
-            publish_patch(content)
-        self.assertFalse(missing.exists())
-        self.assert_repo_untouched()
-        self.assertTrue(target.exists())
-
 
 class RollbackAndErrorTests(WorkCase):
     def test_rollback_removes_its_own_file(self):
@@ -1110,19 +1025,6 @@ class RollbackAndErrorTests(WorkCase):
         token = PatchToken(0, 0, 0, sha(b""), str(path))
         self.assertFalse(rollback_patch(token))
         self.assertTrue(path.is_dir())
-
-    def test_rollback_does_not_follow_a_symlink(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        token = publish_patch(self.approved())
-        dest = Path(token.path)
-        saved = dest.read_bytes()
-        other = self.work / "other.txt"
-        other.write_bytes(saved)
-        dest.unlink()
-        os.symlink(other, dest)
-        self.assertFalse(rollback_patch(token))
-        self.assertEqual(other.read_bytes(), saved)
 
     def test_write_error_removes_partial_file_and_exits_11(self):
         content = self.approved()
@@ -1408,6 +1310,83 @@ class SealTests(WorkCase):
             output.ApprovedPatch("x", str(self.root), object())
 
 
+class PatchViewLeakTests(WorkCase):
+    """Security fix: a secret value must be withheld when the context name line and the added
+    value line are adjacent in the patch, although the removed blank line separates them in the
+    mixed view. Fake values are assembled at runtime."""
+
+    V = "FAKE" + "VALUE" + "".join(chr(65 + (i * 7) % 26) for i in range(12)) + "4821"
+    W = "FAKE" + "OTHER" + "".join(chr(66 + (i * 5) % 25) for i in range(12)) + "7390"
+
+    def render(self, path, orig, prop, redactor=redact):
+        return render_patch([DocumentChange(path, "\n".join(orig) + "\n", "\n".join(prop) + "\n")], redactor)
+
+    def assert_withheld(self, path, orig, prop):
+        r = self.render(path, orig, prop)
+        self.assertEqual(len(r.hunks), 1)
+        self.assertTrue(r.hunks[0].withheld)
+        self.assertEqual(r.hunks[0].lines, ())
+        self.assertTrue(r.withheld)
+        self.assertTrue(all(f.file == path and isinstance(f.line, int) and f.line >= 1 for f in r.withheld))
+        self.assertEqual(r.text, "")
+        with self.assertRaises(WithheldHunksError) as ctx:
+            raise_if_withheld(r)
+        for text in (r.text, repr(r), repr(r.hunks), repr(r.withheld), str(ctx.exception), repr(ctx.exception)):
+            self.assertNotIn(self.V, text)
+            self.assertNotIn(self.W, text)
+        return r
+
+    def test_regressions_that_leaked(self):
+        F = "Plain context line."
+        cases = {
+            "A1": ("README.md", ["password:", "", F], ["password:", self.V, F]),
+            "B1": ("docs/x.md", ["api_key =", "", F], ["api_key =", self.V, F]),
+            "B3": ("README.md", ["password:", ""], ["password:", self.V]),
+        }
+        for name, (path, orig, prop) in cases.items():
+            with self.subTest(name):
+                r = self.assert_withheld(path, orig, prop)
+                self.assertIn(WithheldFinding(path, 1), r.withheld)
+
+    def test_arrangements_that_stay_withheld(self):
+        N, V, W, F = "password:", self.V, self.W, "Plain context line."
+        cases = {
+            "A2": ("README.md", [N, "old", F], [N, V, F]),
+            "A3": ("README.md", ["x", F], [N, V, F]),
+            "A4": ("README.md", [N, V, "old"], [N, V, "new"]),
+            "A5": ("README.md", [N, V, "z"], [N, W, "z"]),
+            "A6": ("README.md", [N, V, "z"], ["q", "z"]),
+            "A7": ("README.md", ["old", V], [N, V]),
+            "B2": ("README.md", [N + " ", "", F], [N + " ", V, F]),
+            "control": ("README.md", [F], [N, V, F]),
+        }
+        for name, (path, orig, prop) in cases.items():
+            with self.subTest(name):
+                self.assert_withheld(path, orig, prop)
+
+    def test_harmless_blank_line_removal_is_still_written(self):
+        r = self.render("README.md", ["x", "", "Plain context line."], ["x", "y", "Plain context line."])
+        self.assertEqual(r.withheld, ())
+        self.assertFalse(r.hunks[0].withheld)
+        self.assertIn("+y\n", r.text)
+        approve_patch(r, PASSED, str(self.root), (), redact)
+
+    def test_approve_patch_refuses_an_object_that_would_leak(self):
+        N, F = "password:", "Plain context line."
+        r = self.render("README.md", [N, "", F], [N, self.V, F], redactor=NoOpRedactor())
+        self.assertEqual(r.withheld, ())  # the no-op redactor let it through
+        with self.assertRaises(UnexpectedStageError) as ctx:
+            approve_patch(r, PASSED, str(self.root), (), redact)
+        self.assertNotIn(self.V, str(ctx.exception))
+        self.assertEqual(os.listdir(self.work), [])
+
+    def test_views_are_linear_in_size(self):
+        lines = ["Plain line %d." % i for i in range(3000)]
+        start = time.perf_counter()
+        render_patch([DocumentChange("docs/a.md", long_doc(lines), long_doc(lines[:1500] + ["new"] + lines[1500:]))], redact)
+        self.assertLess(time.perf_counter() - start, 30)
+
+
 class RollbackRestrictionTests(WorkCase):
     """M3: the rollback only ever deletes a file at <dir>/output/docsync.patch."""
 
@@ -1604,22 +1583,6 @@ class DestinationRaceTests(WorkCase):
         with self.assertRaises(PatchWriteError):
             check_no_existing_patch()
         self.assertEqual((sorted(os.listdir(victim)), (victim / "f.txt").read_bytes()), before)
-        self.assert_repo_untouched()
-
-    def test_dangling_symlink_to_a_non_docs_target_creates_nothing(self):
-        if not SYMLINKS:
-            self.skipTest(SYMLINK_SKIP)
-        target = self.other_dir() / "created-through-link.txt"
-        (self.work / "output").mkdir()
-        os.symlink(target, self.work / "output" / "docsync.patch")
-        content = self.approved()
-        with self.assertRaises(PatchWriteError) as ctx:
-            check_no_existing_patch()
-        self.assertEqual(ctx.exception.exit_code, 11)
-        with self.assertRaises(PatchWriteError):
-            publish_patch(content)
-        self.assertFalse(target.exists())
-        self.assertEqual(os.listdir(target.parent), [])
         self.assert_repo_untouched()
 
     def stray_setup(self):

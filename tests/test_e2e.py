@@ -1022,11 +1022,29 @@ EDGE_TABLE = {
     "E2": (E2E + "ReadOnlyTests.test_every_failed_or_stopped_run_leaves_no_patch_and_changes_nothing",),
     "E3": (E2E + "AcceptanceE2ETests.test_ac05_empty_unavailable_and_over_cap_inputs_give_a_clear_status_and_no_patch",),
     "E4": (E2E + "AcceptanceE2ETests.test_e4_generated_and_documentation_changes_are_skipped_and_reported",),
-    "E5": (E2E + "AcceptanceE2ETests.test_ac05_empty_unavailable_and_over_cap_inputs_give_a_clear_status_and_no_patch",),
+    # E5 / D12 / D14: over the cap exits 5 with counts before the diff text is fetched; no per-file
+    # or repository-size limit (large file and large Git output are processed, not refused).
+    "E5": (
+        E2E + "AcceptanceE2ETests.test_ac05_empty_unavailable_and_over_cap_inputs_give_a_clear_status_and_no_patch",
+        _tid("test_bounds", "MainOverCapBeforeFetchTests", "test_more_than_50_files_exits_5_with_counts_and_never_requests_diff_text"),
+        _tid("test_bounds", "MainOverCapBeforeFetchTests", "test_more_than_2000_changed_lines_exits_5_with_counts_and_never_requests_diff_text"),
+        _tid("test_bounds", "GateTests", "test_gate_runs_after_raw_and_numstat_and_before_text_and_untracked"),
+        _tid("test_bounds", "GateTests", "test_a_raising_gate_propagates_unchanged_and_no_text_is_fetched"),
+        _tid("test_bounds", "BoundedRunnerTests", "test_tens_of_mebibytes_of_stdout_are_returned_in_full"),
+        _tid("test_bounds", "ReaderTests", "test_a_file_above_the_old_4_000_000_byte_bound_is_read_in_full"),
+        _tid("test_bounds", "ReaderTests", "test_proposal_still_skips_a_document_above_max_original_chars"),
+    ),
     "E6": (E2E + "AcceptanceE2ETests.test_ac04_no_documentation_target_creates_no_files",),
-    "E7": (E2E + "InstructionsAsDataTests.test_instruction_text_cannot_pick_the_target",),
+    "E7": (
+        _tid("test_cli", "WithoutTargetTests", "test_two_distinct_docs_listed_exit_8"),
+        E2E + "ExitCodeContractTests.test_success_exits_0_and_every_expected_outcome_exits_with_its_own_code",
+    ),
     "E8": (E2E + "AcceptanceE2ETests.test_ac06_validation_failure_is_reported_with_file_and_rule",),
-    "E9": (E2E + "AcceptanceE2ETests.test_ac03_insufficient_information_is_not_found_and_not_invented",),
+    "E9": (
+        E2E + "AcceptanceE2ETests.test_ac03_insufficient_information_is_not_found_and_not_invented",
+        _tid("test_generation", "GenerateTests", "test_conflicting_sources_list_both_files_and_get_no_edit"),
+        _tid("test_generation", "GenerateTests", "test_conflict_does_not_block_unrelated_pairs"),
+    ),
     "E10": (E2E + "ExitCodeContractTests.test_success_exits_0_and_every_expected_outcome_exits_with_its_own_code",),
     "E11": (E2E + "InstructionsAsDataTests.test_secret_like_text_in_the_edited_document_is_withheld_and_never_shown",),
     "E12": (E2E + "AcceptanceE2ETests.test_e12_untracked_files_are_listed_as_not_analyzed",),

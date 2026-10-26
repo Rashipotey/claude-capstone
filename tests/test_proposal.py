@@ -2,7 +2,6 @@
 
 import ast
 import builtins
-import contextlib
 import tempfile
 import unittest
 from pathlib import Path

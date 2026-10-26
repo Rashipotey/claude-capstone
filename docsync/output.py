@@ -384,6 +384,30 @@ def _pem_overlap(blocks, start, count):
     return {b for b, e in blocks if b <= last and start <= e}
 
 
+def _flagged_entries(entries, redactor):
+    """0-based indexes of the hunk entries a reader could see as a secret. The detector runs on
+    three views, each in file order: the mixed view (every entry, as always), the proposed-side
+    view (context + added) and the original-side view (context + removed), because in the real
+    patch the lines of those views are adjacent where the mixed view separates them. Linear in
+    the hunk size. Empty set = nothing flagged. Never returns or stores a value."""
+    flagged = set()
+    for keep in (None, " +", " -"):
+        idx = [i for i, e in enumerate(entries) if keep is None or e[0] in keep]
+        if not idx:
+            continue
+        text = _body_text([entries[i] for i in idx])
+        if not redactor.contains_secret(text):
+            continue
+        hits = {idx[n - 1] for n in redactor.secret_line_numbers(text) if 1 <= n <= len(idx)}
+        flagged |= hits or {idx[0]}
+    return flagged
+
+
+def _entries_from_lines(lines):
+    """(tag, content, 0) entries re-derived from rendered hunk lines (header and markers skipped)."""
+    return [(line[0], line[1:], 0) for line in lines[1:] if not line.startswith("\\")]
+
+
 def _hunks_for(change, redactor):
     diff = list(
         difflib.unified_diff(
@@ -428,14 +452,9 @@ def _hunks_for(change, redactor):
                 entries.append((tag, content, new_no))
                 added.append(new_no)
                 new_no += 1
-        text = _body_text(entries)
-        found = set()
-        withhold = False
-        if redactor.contains_secret(text):
-            withhold = True
-            found = {entries[i - 1][2] for i in redactor.secret_line_numbers(text) if 1 <= i <= len(entries)}
-            if not found:
-                found = {entries[0][2]}
+        flagged = _flagged_entries(entries, redactor)
+        found = {entries[i][2] for i in flagged}
+        withhold = bool(flagged)
         pem = _pem_overlap(old_blocks, old_start, old_count) | _pem_overlap(new_blocks, new_start, new_count)
         if pem:
             withhold = True
@@ -570,7 +589,7 @@ def approve_patch(rendered, validation, repository, unresolved, redactor):
         raise _refuse("an in-scope change is unresolved")
     if _text_from_hunks(rendered.hunks) != rendered.text:
         raise _refuse("the patch text does not match its hunks")
-    suspicious = [h for h in rendered.hunks if redactor.contains_secret(_body_from_lines(h.lines))]
+    suspicious = [h for h in rendered.hunks if _flagged_entries(_entries_from_lines(h.lines), redactor)]
     if suspicious or redactor.contains_secret(rendered.text):
         raise _refuse("a secret-like value was found in the patch (%d hunk(s))" % len(suspicious))
     try:

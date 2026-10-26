@@ -29,7 +29,7 @@
         "withLog": 1
       }
     ],
-    "userEmail": "rashi_potey@epam.com",
+    "userEmail": "<redacted>",
     "periodStart": "2026-10-25T08:41:26.562Z",
     "periodEnd": "2026-10-25T11:28:29.366Z"
   },
@@ -39,7 +39,7 @@
       "agentName": "claude",
       "provider": "ai-run-sso",
       "title": "Invoke `/docsync-workflow status` to verify the skill and current pipeline state. Confirm T10 is approved and T11's dependencies are satisfied. Do not modify files or start implementation during this check. Report the result and wait for my authorization.",
-      "project": "C:\\Users\\RashiPotey\\Documents\\claude-capstone",
+      "project": "<redacted>",
       "branch": "feature/docsync-pipeline",
       "startTime": 1792917686562,
       "durationMs": 10022804,
@@ -159,7 +159,7 @@
         }
       ],
       "hadLog": true,
-      "agentSessionFile": "C:\\Users\\RashiPotey\\.claude\\projects\\C--Users-RashiPotey-Documents-claude-capstone\\a2265ccb-1921-4e29-b2fe-0e740bb003b6.jsonl",
+      "agentSessionFile": "<redacted>",
       "costSeries": [
         {
           "t": 1792780759785,

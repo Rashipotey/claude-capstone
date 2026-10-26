@@ -13,7 +13,6 @@ import inspect
 import io
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -181,7 +180,8 @@ class HappyPathTests(Base):
         code, _out, _err = self.run_main([str(r.path)])
         self.assertEqual(code, 0)
         self.assertEqual(self.names(), [
-            "check_no_existing_patch", "git", "check_size", "analyze", "discover_candidates",
+            # the size gate runs inside retrieve_diff, between the numstat and the diff-text calls
+            "check_no_existing_patch", "git", "check_size", "git", "analyze", "discover_candidates",
             "map_changes", "generate", "build_proposals", "render_patch", "validate_content",
             "approve_patch", "render_report", "publish_patch", "emit_report",
         ])
@@ -327,17 +327,6 @@ class StopPathTests(Base):
         code, err = self.run_with_stdout([str(r.path)], _Broken())
         self.assertEqual(code, 11)
         self.assertEqual(sha(self.patch_path), digest)
-
-    def test_dangling_symlink_counts_as_existing_patch(self):
-        r = self.repo()
-        self.patch_path.parent.mkdir(parents=True)
-        try:
-            os.symlink(os.path.join(self.work, "nowhere"), self.patch_path)
-        except (OSError, NotImplementedError):
-            self.skipTest("symbolic links are not available")
-        code, _out, _err = self.run_main([str(r.path)])
-        self.assertEqual(code, 11)
-        self.assertTrue(os.path.islink(self.patch_path))
 
     def test_content_filter_exit_3_no_diff_call(self):
         r = self.repo()

@@ -1,0 +1,28 @@
+name: test
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        # The implementation plan names Python 3.12. The local evidence so far was Python 3.15.0
+        # on Windows only, so Linux and these Python versions are untested until this runs.
+        python-version: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      # No requirements file exists: the suite uses the standard library and git only.
+      - name: Run the test suite
+        run: python -B -m unittest discover -v

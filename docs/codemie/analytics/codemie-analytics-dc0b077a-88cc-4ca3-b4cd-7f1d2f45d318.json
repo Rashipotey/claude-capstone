@@ -29,7 +29,7 @@
         "withLog": 1
       }
     ],
-    "userEmail": "rashi_potey@epam.com",
+    "userEmail": "<redacted>",
     "periodStart": "2026-10-23T17:41:59.178Z",
     "periodEnd": "2026-10-23T17:44:39.928Z"
   },
@@ -39,7 +39,7 @@
       "agentName": "claude",
       "provider": "ai-run-sso",
       "title": "Create an `impl-log/` directory for DOCSYNC implementation history. 1. Create `README.md` and one Markdown log per implementation phase, following the approved plan's phase boundaries. 2. Backfill T01–T09 using available evidence. Record changes, test results, every skipped test, security findings, limitations, verification status, and human approvals. Clearly label unverified information. 3. For T10 onward, the orchestrator must update the relevant phase log at task start, after implementation/audit, and after my sign-off. Preserve previous attempts and corrections. 4. Keep `docs/pipeline-state.md` as the source of truth for current status; update it only to record the logging setup and log location. 5. Do not modify approved planning documents, implement T10, add runtime logging, stage files, or commit anything. Verify the files and historical records, report created/modified files and any missing evidence, then stop and wait for my sign-off.",
-      "project": "C:\\Users\\RashiPotey\\Documents\\claude-capstone",
+      "project": "<redacted>",
       "branch": "feature/docsync-pipeline",
       "startTime": 1792777319178,
       "durationMs": 160750,
@@ -138,7 +138,7 @@
         }
       ],
       "hadLog": true,
-      "agentSessionFile": "C:\\Users\\RashiPotey\\.claude\\projects\\C--Users-RashiPotey-Documents-claude-capstone\\3fdaa085-68e3-4763-90da-4cbafbe0fbb6.jsonl",
+      "agentSessionFile": "<redacted>",
       "costSeries": [
         {
           "t": 1792777328235,

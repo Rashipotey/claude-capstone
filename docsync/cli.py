@@ -538,12 +538,20 @@ def _prepare(argv, run):
 
     run.enter("gitadapter")
     adapter = gitadapter.GitAdapter(request.repo_path, redactor=redact.redact)
-    diff = adapter.retrieve_diff()  # root check, content-filter preflight, diff
+    def gate(files):
+        # Pre-fetch gate (C-4, D12): an over-cap diff stops before its text is fetched.
+        run.examined = tuple(f.path for f in files)
+        try:
+            sizegate.check_size(files, redactor=redact.redact)
+        except Exception:
+            run.enter("sizegate")  # name the stage in the stop report
+            raise
+
+    diff = adapter.retrieve_diff(gate=gate)  # root check, content-filter preflight, diff
     run.examined = tuple(f.path for f in diff.files)
     run.untracked = tuple(diff.untracked)
 
-    run.enter("sizegate")
-    sizegate.check_size(diff.files, redactor=redact.redact)
+    run.enter("sizegate")  # the check itself ran inside retrieve_diff (gate), before the diff text
 
     run.enter("analysis")
     analyzed = analysis.analyze(diff.files, diff.diff_text, redactor=redact.redact,

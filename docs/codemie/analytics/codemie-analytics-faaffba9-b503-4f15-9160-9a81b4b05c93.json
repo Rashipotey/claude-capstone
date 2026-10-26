@@ -29,7 +29,7 @@
         "withLog": 1
       }
     ],
-    "userEmail": "rashi_potey@epam.com",
+    "userEmail": "<redacted>",
     "periodStart": "2026-10-23T17:55:19.572Z",
     "periodEnd": "2026-10-23T18:00:22.572Z"
   },
@@ -39,7 +39,7 @@
       "agentName": "claude",
       "provider": "ai-run-sso",
       "title": "Update `orchestrator.md` to make `impl-log/` maintenance mandatory. - Log each task at start, after implementation/audit, and after my sign-off. - Record changes, test results and skips, security findings, limitations, verification status, and approval. - Preserve previous attempts; append corrections. - The orchestrator owns and updates phase logs. - Keep `pipeline-state.md` for current status and `impl-log/` for detailed history. - Never fabricate evidence or claim unverified results are verified. - Update the log before starting the next task. - Make only necessary changes. Do not modify approved planning documents, start T10, stage, or commit. Report the changes and wait for my sign-off.",
-      "project": "C:\\Users\\RashiPotey\\Documents\\claude-capstone",
+      "project": "<redacted>",
       "branch": "feature/docsync-pipeline",
       "startTime": 1792778119572,
       "durationMs": 303000,
@@ -123,7 +123,7 @@
         }
       ],
       "hadLog": true,
-      "agentSessionFile": "C:\\Users\\RashiPotey\\.claude\\projects\\C--Users-RashiPotey-Documents-claude-capstone\\db75f888-3b98-41f5-83a2-5bb86b55dbc0.jsonl",
+      "agentSessionFile": "<redacted>",
       "costSeries": [
         {
           "t": 1792778129247,

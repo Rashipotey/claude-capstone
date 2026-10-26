@@ -29,7 +29,7 @@
         "withLog": 1
       }
     ],
-    "userEmail": "rashi_potey@epam.com",
+    "userEmail": "<redacted>",
     "periodStart": "2026-10-22T04:49:18.316Z",
     "periodEnd": "2026-10-22T12:49:48.809Z"
   },
@@ -39,7 +39,7 @@
       "agentName": "claude",
       "provider": "ai-run-sso",
       "title": "Review the resolution proposals and identify the minimum human decisions required before revising DOCSYNC documents. Prioritize: 1. Safe, authorized document-rework and security-audit workflow. 2. D19 candidate-mapping rule (compare both options). 3. NF-1 diff source and untracked files. 4. P4 all-or-nothing patch behavior. 5. P8 binary and size-counting rules. 6. Approval-status reconciliation. Recommend conservative defaults and flag trade-offs. Verify actual agent permissions before suggesting changes. Do not edit files, change statuses, implement code, or commit. Return only a concise decision list.",
-      "project": "C:\\Users\\RashiPotey\\Documents\\claude-capstone",
+      "project": "<redacted>",
       "branch": "feature/docsync-pipeline",
       "startTime": 1792644558316,
       "durationMs": 28830493,
@@ -147,7 +147,7 @@
         }
       ],
       "hadLog": true,
-      "agentSessionFile": "C:\\Users\\RashiPotey\\.claude\\projects\\C--Users-RashiPotey-Documents-claude-capstone\\44ddf9a8-1b6f-478d-b1c1-5d0f3f42a667.jsonl",
+      "agentSessionFile": "<redacted>",
       "costSeries": [
         {
           "t": 1792644995956,

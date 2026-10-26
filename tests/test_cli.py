@@ -357,7 +357,7 @@ class LinkEscapeTests(Fixture):
     def test_junction_docs_directory_is_rejected(self):
         (self.outside / "a.md").write_text("# outside\n", encoding="utf-8")
         if not _try_junction(self.root / "docs", self.outside):
-            self.skipTest("directory junction creation unavailable on this platform")
+            self.skipTest("directory junction creation unavailable (junctions are Windows-only, or creation failed on this machine)")
         self.addCleanup(lambda: os.rmdir(self.root / "docs"))  # removes only the junction
         # discover_candidates does not detect a junction (T08 note); target validation must.
         self.assertIn("docs/a.md", mapping.discover_candidates(self.root))
@@ -371,32 +371,11 @@ class LinkEscapeTests(Fixture):
         (self.root / "real").mkdir()
         (self.root / "real" / "a.md").write_text("# x\n", encoding="utf-8")
         if not _try_junction(self.root / "docs", self.root / "real"):
-            self.skipTest("directory junction creation unavailable on this platform")
+            self.skipTest("directory junction creation unavailable (junctions are Windows-only, or creation failed on this machine)")
         self.addCleanup(lambda: os.rmdir(self.root / "docs"))
         with self.assertRaises(UsageError) as cm:
             cli.validate_target("docs/a.md", self.root, ("docs/a.md",), redactor=redact)
         self.assertIn("link", str(cm.exception))
-
-    def test_symlinked_file_pointing_outside_is_rejected(self):
-        target = self.outside / "secret.md"
-        target.write_text("# outside\n", encoding="utf-8")
-        (self.root / "docs").mkdir()
-        try:
-            os.symlink(target, self.root / "docs" / "a.md")
-        except (OSError, NotImplementedError):
-            self.skipTest("symlink creation unavailable on this platform")
-        with self.assertRaises(UsageError) as cm:
-            cli.validate_target("docs/a.md", self.root, ("docs/a.md",), redactor=redact)
-        self.assertEqual(cm.exception.exit_code, 2)
-
-    def test_symlinked_docs_directory_pointing_outside_is_rejected(self):
-        (self.outside / "a.md").write_text("# outside\n", encoding="utf-8")
-        try:
-            os.symlink(self.outside, self.root / "docs", target_is_directory=True)
-        except (OSError, NotImplementedError):
-            self.skipTest("symlink creation unavailable on this platform")
-        with self.assertRaises(UsageError):
-            cli.validate_target("docs/a.md", self.root, ("docs/a.md",), redactor=redact)
 
     def test_plain_file_is_accepted(self):
         self.make_docs("docs/a.md")

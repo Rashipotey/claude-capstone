@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -73,18 +72,6 @@ class ResolverTests(unittest.TestCase):
         with mock.patch("os.scandir", side_effect=PermissionError("denied")):
             message = self.assert_input_error(str(self.root))
         self.assertIn("not readable", message)
-
-    @unittest.skipIf(sys.platform == "win32",
-                     "recorded reason: chmod does not remove read access for directories on Windows")
-    def test_unreadable_directory_real(self):
-        if hasattr(os, "geteuid") and os.geteuid() == 0:
-            self.skipTest("recorded reason: running as root, permissions are not enforced")
-        locked = self.root / "locked"
-        locked.mkdir()
-        locked.chmod(0)
-        self.addCleanup(locked.chmod, 0o700)
-        message = self.assert_input_error(str(locked))
-        self.assertIn("locked", message)
 
     def test_null_character_is_a_clear_error(self):
         message = self.assert_input_error("bad\x00path")

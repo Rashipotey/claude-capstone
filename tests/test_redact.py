@@ -10,6 +10,9 @@ import unittest
 
 from docsync import redact
 
+# Timing tests use time.process_time() (CPU time of this process), not wall-clock time, so a
+# machine stall or competing load cannot fail them; the bounds and inputs are unchanged.
+
 FAKE = "Zq7fakeVALUE9x"  # fake secret value
 AWS_ID = "AKIA" + "ABCDEFGHIJKLMNOP"  # fake, AWS-style shape
 GH_TOKEN = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2"  # fake
@@ -262,12 +265,12 @@ class HostileInputTests(RedactTestCase):
         # Only the patterns added in T13 Attempt 2 are timed: the older assignment pattern
         # is known to be super-linear on some adversarial input (T02, not changed here).
         import time
-        start = time.perf_counter()
+        start = time.process_time()
         for name in ("_BEARER", "_JWT", "_URL_CRED", "_EXTRA_ASSIGNMENT"):
             for _ in getattr(redact, name).finditer(text):
                 pass
             getattr(redact, name).sub("x", text)
-        return time.perf_counter() - start
+        return time.process_time() - start
 
     def test_hostile_long_lines_are_fast(self):
         n = self.N
@@ -394,9 +397,9 @@ class AssignmentHostileInputTests(RedactTestCase):
         return unit * (self.N // len(unit))
 
     def elapsed(self, func, text):
-        start = time.perf_counter()
+        start = time.process_time()
         func(text)
-        return time.perf_counter() - start
+        return time.process_time() - start
 
     def test_assignment_pattern_itself(self):
         for case, unit in self.SHAPES.items():
@@ -509,9 +512,9 @@ class LineNumberTimingTests(RedactTestCase):
     BOUND = 5.0
 
     def elapsed(self, text):
-        start = time.perf_counter()
+        start = time.process_time()
         result = redact.secret_line_numbers(text)
-        return time.perf_counter() - start, result
+        return time.process_time() - start, result
 
     def test_adversarial_shapes_at_200k(self):
         for case, unit in {"key=a": "key=a ", "unclosed quote": 'key="', "many lines": "token=x\n",
@@ -583,12 +586,12 @@ class EmptyUserUrlTests(RedactTestCase):
         }
         for case, text in cases.items():
             with self.subTest(case=case):
-                start = time.perf_counter()
+                start = time.process_time()
                 redact._URL_CRED.sub("x", text)
                 list(redact._URL_CRED.finditer(text))
                 redact.contains_secret(text)
                 redact.redact(text)
-                self.assertLess(time.perf_counter() - start, 5.0, case)
+                self.assertLess(time.process_time() - start, 5.0, case)
 
 
 class DocumentedGapTests(RedactTestCase):
@@ -1054,14 +1057,14 @@ class MarkdownAndJwtHostileTests(RedactTestCase):
     }
 
     def run_all(self, text):
-        start = time.perf_counter()
+        start = time.process_time()
         redact.redact(text)
         redact.contains_secret(text)
         redact.secret_line_numbers(text)
         for name in ("_MD_ASSIGNMENT", "_MD_TABLE", "_JWT", "_ASSIGNMENT", "_EXTRA_ASSIGNMENT"):
             for _ in getattr(redact, name).finditer(text):
                 pass
-        return time.perf_counter() - start
+        return time.process_time() - start
 
     def test_200k_single_line_shapes(self):
         for case, unit in self.SHAPES.items():
@@ -1161,14 +1164,14 @@ class AttemptSixHostileTests(RedactTestCase):
     }
 
     def run_all(self, text):
-        start = time.perf_counter()
+        start = time.process_time()
         redact.redact(text)
         redact.contains_secret(text)
         redact.secret_line_numbers(text)
         for name in ("_MD_BACKTICK_OPEN", "_MD_TABLE", "_MD_ASSIGNMENT", "_ASSIGNMENT", "_EXTRA_ASSIGNMENT"):
             for _ in getattr(redact, name).finditer(text):
                 pass
-        return time.perf_counter() - start
+        return time.process_time() - start
 
     def test_200k_shapes(self):
         for case, unit in self.SHAPES.items():
@@ -1471,14 +1474,14 @@ class AttemptSevenHostileTests(RedactTestCase):
     PATTERNS = ("_MD_ODD_VALUE", "_MD_STAR_VALUE", "_MD_ASSIGNMENT", "_ASSIGNMENT", "_EXTRA_ASSIGNMENT")
 
     def run_all(self, text):
-        start = time.perf_counter()
+        start = time.process_time()
         redact.redact(text)
         redact.contains_secret(text)
         redact.secret_line_numbers(text)
         for name in self.PATTERNS:
             for _ in getattr(redact, name).finditer(text):
                 pass
-        return time.perf_counter() - start
+        return time.process_time() - start
 
     def test_200k_units(self):
         for case, unit in self.UNITS.items():
@@ -1998,11 +2001,11 @@ class AttemptEightHostileTests(AttemptEightCase):
     }
 
     def run_all(self, text):
-        start = time.perf_counter()
+        start = time.process_time()
         redact.redact(text)
         redact.contains_secret(text)
         redact.secret_line_numbers(text)
-        return time.perf_counter() - start
+        return time.process_time() - start
 
     def test_200k_units(self):
         for case, unit in self.UNITS.items():

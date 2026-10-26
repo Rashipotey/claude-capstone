@@ -29,7 +29,7 @@
         "withLog": 1
       }
     ],
-    "userEmail": "rashi_potey@epam.com",
+    "userEmail": "<redacted>",
     "periodStart": "2026-10-23T18:32:02.889Z",
     "periodEnd": "2026-10-23T18:38:51.429Z"
   },
@@ -39,7 +39,7 @@
       "agentName": "claude",
       "provider": "ai-run-sso",
       "title": "Create a project-level `docsync-workflow` skill for DOCSYNC. - Verify the installed CLI's supported skill format and location before creating it. - Read `docs/orchestrator.md`, `docs/impl-plan.md`, `docs/pipeline-state.md`, and approved planning documents. - Encode the rules: one authorized task at a time, human sign-off between tasks, no silent changes to approved plans, no commits until all work is complete and authorized, accurate test/audit reporting, and required `pipeline-state.md` and `impl-log/` updates. - Preserve limitations and implementation history; stop and ask me if a genuine requirements or architecture conflict arises. - Validate the skill and explain how to invoke it. Do not modify application code or approved planning documents. Do not start T11, stage, or commit anything. Report changes and wait for my review.",
-      "project": "C:\\Users\\RashiPotey\\Documents\\claude-capstone",
+      "project": "<redacted>",
       "branch": "feature/docsync-pipeline",
       "startTime": 1792780322889,
       "durationMs": 408540,
@@ -124,7 +124,7 @@
         }
       ],
       "hadLog": true,
-      "agentSessionFile": "C:\\Users\\RashiPotey\\.claude\\projects\\C--Users-RashiPotey-Documents-claude-capstone\\08469564-5eec-4391-b3be-6ca16154dbd5.jsonl",
+      "agentSessionFile": "<redacted>",
       "costSeries": [
         {
           "t": 1792780335279,
