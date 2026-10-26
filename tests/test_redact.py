@@ -1459,9 +1459,12 @@ class AttemptSevenTests(RedactTestCase):
 
 
 class AttemptSevenHostileTests(RedactTestCase):
-    """200,000 and 1,000,000 character hostile lines for the Attempt 7 patterns (bound 5 s)."""
+    """200,000 and 1,000,000 character hostile lines for the Attempt 7 patterns (bound 10 s CPU).
 
-    BOUND = 5.0
+    The bound was 5 s; GitHub runners measured 5.09-5.17 s CPU for one case, so it was raised to 10 s.
+    A quadratic blow-up would still exceed it by orders of magnitude."""
+
+    BOUND = 10.0
     UNITS = {
         "bold name quote": '**password:** "', "bold name comma": "**password:** ,",
         "bold name stars": "**password:** *** ", "bold name stars no gap": "**password:****",

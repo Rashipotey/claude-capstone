@@ -23,7 +23,8 @@ class ImmutabilityTests(unittest.TestCase):
     def test_contracts_cannot_gain_attributes(self):
         # slots=True: no instance dictionary to smuggle state into
         for instance in (c.ChangeRequest("repo"), c.ChangedFile("a.py", "M"), c.ProposedEdit("README.md", "why")):
-            with self.assertRaises((AttributeError, dataclasses.FrozenInstanceError)):
+            # Python 3.12 raises TypeError here (frozen + slots dataclass quirk); the assignment is refused either way.
+            with self.assertRaises((AttributeError, TypeError, dataclasses.FrozenInstanceError)):
                 instance.extra = 1
 
     def test_sequences_are_stored_as_tuples(self):

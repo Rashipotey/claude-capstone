@@ -690,7 +690,10 @@ class DiffRetrievalTests(unittest.TestCase):
     def test_a_staged_mode_only_change(self):
         with TempGitRepo({"run.sh": "echo hi\n"}) as repo:
             repo.git("update-index", "--chmod=+x", "run.sh")
-            f = self.collect(repo).files[0]
+            # ``git diff HEAD`` compares HEAD with the working tree: where the file system tracks the
+            # executable bit (Linux), the file on disk must also be executable or the change cancels out.
+            os.chmod(repo.path / "run.sh", 0o755)
+            f =self.collect(repo).files[0]
             self.assertEqual((f.path, f.status, f.old_mode, f.new_mode, f.added, f.deleted, f.binary),
                              ("run.sh", "M", "100644", "100755", 0, 0, False))
 
